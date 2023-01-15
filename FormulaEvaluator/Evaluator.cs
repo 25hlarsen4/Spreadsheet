@@ -11,16 +11,25 @@ namespace FormulaEvaluator
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] tokens = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                tokens[i] = tokens[i].Trim();
+            }
 
             Stack<int> vals = new Stack<int>();
             Stack<string> operators = new Stack<string>();
 
-            foreach (String token in tokens)
+            foreach (string token in tokens)
             {
-                // if token is int
-                if (int.TryParse(token, out int result))
+                if (token == "")
                 {
-                    if (operators.Peek() == "*" || operators.Peek() == "/")
+                    continue;
+                }
+
+                // if token is int
+                else if (int.TryParse(token, out int result))
+                {
+                    if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
                         if (vals.Count == 0)
                         {
@@ -50,13 +59,13 @@ namespace FormulaEvaluator
                 }
 
 
-                // if token is variable
+                // else if token is variable
 
 
-                // if token is + or -
-                if (token == "+" || token == "-")
+                // else if token is + or -
+                else if (token == "+" || token == "-")
                 {
-                    if (operators.Peek() == "+" || operators.Peek() == "-")
+                    if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
                         if (vals.Count < 2)
                         {
@@ -81,8 +90,8 @@ namespace FormulaEvaluator
                 }
 
 
-                // if token is * or / or (
-                if (token == "*" || token == "/" || token == "(")
+                // else if token is * or / or (
+                else if (token == "*" || token == "/" || token == "(")
                 {
                     operators.Push(token);
                 }
@@ -95,10 +104,10 @@ namespace FormulaEvaluator
                 //}
 
 
-                // if token is )
-                if (token == ")")
+                // else if token is )
+                else if (token == ")")
                 {
-                    if (operators.Peek() == "+" || operators.Peek() == "-")
+                    if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
                         if (vals.Count < 2)
                         {
@@ -119,13 +128,13 @@ namespace FormulaEvaluator
                         }
                     }
 
-                    if (operators.Peek() != "(")
+                    if (operators.Count > 0 && operators.Peek() != "(")
                     {
                         throw new ArgumentException();
                     }
                     operators.Pop();
 
-                    if (operators.Peek() == "*" || operators.Peek() == "/")
+                    if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
                         if (vals.Count < 2)
                         {
@@ -149,6 +158,12 @@ namespace FormulaEvaluator
                             vals.Push(val1 / val2);
                         }
                     }
+                }
+
+                // else (therefore the token is an illegal character)
+                else
+                {
+                    throw new ArgumentException();
                 }
 
             }
