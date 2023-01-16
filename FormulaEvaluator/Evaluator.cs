@@ -1,13 +1,48 @@
-﻿using System.Collections;
+﻿/// <summary>
+/// Author:    Hannah Larsen
+/// Partner:    None
+/// Date:
+/// Course: CS3500, University of Utah, School of Computing
+/// Copyright: CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+/// 
+/// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+/// All references used in the completion of the assignment are cited in my README file.
+/// 
+/// File Contents:
+/// 
+/// 
+/// </summary>
+
+using System.Collections;
 using System.Text.RegularExpressions;
 
 namespace FormulaEvaluator
 {
+    /// <summary>
+    /// This library class includes a sole method called Evaluate that takes in a string representing a mathematical
+    /// expression and a delegate that can look up the value associated with any variables that may be within said
+    /// mathematical expression, and returns the integer that the input expression evaluates to.
+    /// </summary>
     public static class Evaluator
     {
 
+        /// <summary>
+        /// This delegate declaration allows the integer value of variables to be looked up.
+        /// </summary>
+        /// <param name="variable_name"> variable_name represents the variable to look up the value of. </param>
+        /// <returns> Returns the integer value the variable represents. </returns>
         public delegate int Lookup(String variable_name);
 
+        /// <summary>
+        /// This method takes in an infix expression to be evaluated and a delegate to look up the value
+        /// of a variable, evaluates the expression, and returns the result of the evaluation.
+        /// </summary>
+        /// <param name="expression"> expression represents the expression to be evaluated. </param>
+        /// <param name="variableEvaluator"> variableEvaluator represents the delegate to look up the value of any 
+        /// variables that may be in the input expression. </param>
+        /// <returns> Returns the integer the input expression evaluates to. </returns>
+        /// <exception cref="ArgumentException"> Throws an ArgumentException if the input expression is
+        /// invalid or if division by zero occurs. </exception>
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
             string[] tokens = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
@@ -59,7 +94,39 @@ namespace FormulaEvaluator
                 }
 
 
-                // else if token is variable
+                // else if token is a variable
+                else if (Regex.IsMatch(token, "[a-zA-Z]+[0-9]+"))
+                {
+                    int var = variableEvaluator(token);
+
+                    if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
+                    {
+                        if (vals.Count == 0)
+                        {
+                            throw new ArgumentException();
+                        }
+
+                        int val = vals.Pop();
+                        string op = operators.Pop();
+                        if (op == "*")
+                        {
+                            vals.Push(val * var);
+                        }
+                        else
+                        {
+                            if (var == 0)
+                            {
+                                throw new ArgumentException();
+                            }
+                            vals.Push(val / var);
+                        }
+                    }
+
+                    else
+                    {
+                        vals.Push(var);
+                    }
+                }
 
 
                 // else if token is + or -
@@ -78,11 +145,11 @@ namespace FormulaEvaluator
 
                         if (op == "+")
                         {
-                            vals.Push(val1 + val2);
+                            vals.Push(val2 + val1);
                         }
                         else
                         {
-                            vals.Push(val1 - val2);
+                            vals.Push(val2 - val1);
                         }
                     }
 
@@ -120,15 +187,15 @@ namespace FormulaEvaluator
 
                         if (op == "+")
                         {
-                            vals.Push(val1 + val2);
+                            vals.Push(val2 + val1);
                         }
                         else
                         {
-                            vals.Push(val1 - val2);
+                            vals.Push(val2 - val1);
                         }
                     }
 
-                    if (operators.Count > 0 && operators.Peek() != "(")
+                    if ((operators.Count > 0 && operators.Peek() != "(") || operators.Count == 0)
                     {
                         throw new ArgumentException();
                     }
@@ -147,7 +214,7 @@ namespace FormulaEvaluator
 
                         if (op == "*")
                         {
-                            vals.Push(val1 * val2);
+                            vals.Push(val2 * val1);
                         }
                         else
                         {
@@ -155,7 +222,7 @@ namespace FormulaEvaluator
                             {
                                 throw new ArgumentException();
                             }
-                            vals.Push(val1 / val2);
+                            vals.Push(val2 / val1);
                         }
                     }
                 }
@@ -195,11 +262,11 @@ namespace FormulaEvaluator
 
                 if (op == "+")
                 {
-                    return val1 + val2;
+                    return val2 + val1;
                 }
                 else
                 {
-                    return val1 - val2;
+                    return val2 - val1;
                 }
             }
         }
