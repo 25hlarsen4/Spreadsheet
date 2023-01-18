@@ -2,14 +2,15 @@
 /// Author:    Hannah Larsen
 /// Partner:    None
 /// Date:
-/// Course: CS3500, University of Utah, School of Computing
-/// Copyright: CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+/// Course:    CS3500, University of Utah, School of Computing
+/// Copyright:     CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 /// 
 /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
 /// All references used in the completion of the assignment are cited in my README file.
 /// 
 /// File Contents:
-/// 
+/// This file contains a library class with an Evaluate method that will evaluate and return the integer result of any
+/// valid mathematical expression (without negative integers) that is passed in (variables can be included).
 /// 
 /// </summary>
 
@@ -32,6 +33,56 @@ namespace FormulaEvaluator
         /// <param name="variable_name"> variable_name represents the variable to look up the value of. </param>
         /// <returns> Returns the integer value the variable represents. </returns>
         public delegate int Lookup(String variable_name);
+
+        /// <summary>
+        /// This is a helper function for the Evaluate algorithm that takes in two integer operands, a value stack, 
+        /// and an operator stack, either multiplies or divides the two operands (depending on what is on top 
+        /// of the operator stack), and finally pushes the result onto the value stack.
+        /// </summary>
+        /// <param name="operand1"> operand1 represents the first operand to either multiply or divide with the second. </param>
+        /// <param name="operand2"> operand2 represents the second operand to either multiply or divide with the first. </param>
+        /// <param name="vals"> vals is the value stack. </param>
+        /// <param name="operators"> operators is the operator stack. </param>
+        /// <exception cref="ArgumentException"></exception>
+        private static void MultiplyOrDivide(int operand1, int operand2, Stack<int> vals, Stack<string> operators)
+        {
+            string op = operators.Pop();
+            if (op == "*")
+            {
+                vals.Push(operand1 * operand2);
+            }
+            else
+            {
+                if (operand2 == 0)
+                {
+                    throw new ArgumentException();
+                }
+                vals.Push(operand1 / operand2);
+            }
+        }
+
+        /// <summary>
+        /// This is a helper function for the Evaluate algorithm that takes in a value stack and an operator stack, 
+        /// pops 2 values off the value stack, either adds or subtracts the two values (depending on what is on top 
+        /// of the operator stack), and finally pushes the result onto the value stack.
+        /// </summary>
+        /// <param name="vals"> vals is the value stack. </param>
+        /// <param name="operators"> operators is the operators stack. </param>
+        private static void AddOrSubtract(Stack<int> vals, Stack<string> operators)
+        {
+            int val1 = vals.Pop();
+            int val2 = vals.Pop();
+            string op = operators.Pop();
+
+            if (op == "+")
+            {
+                vals.Push(val2 + val1);
+            }
+            else
+            {
+                vals.Push(val2 - val1);
+            }
+        }
 
         /// <summary>
         /// This method takes in an infix expression to be evaluated and a delegate to look up the value
@@ -66,25 +117,15 @@ namespace FormulaEvaluator
                 {
                     if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
+
                         if (vals.Count == 0)
                         {
                             throw new ArgumentException();
                         }
 
                         int val = vals.Pop();
-                        string op = operators.Pop();
-                        if (op == "*")
-                        {
-                            vals.Push(val * result);
-                        }
-                        else
-                        {
-                            if (result == 0)
-                            {
-                                throw new ArgumentException();
-                            }
-                            vals.Push(val / result);
-                        }
+
+                        MultiplyOrDivide(val, result, vals, operators);
                     }
 
                     else
@@ -94,32 +135,22 @@ namespace FormulaEvaluator
                 }
 
 
-                // else if token is a variable
-                else if (Regex.IsMatch(token, "[a-zA-Z]+[0-9]+"))
+                // else if token is a variable "[a-zA-Z]+[0-9]+"
+                else if (Regex.IsMatch(token, "^[a-zA-Z]+[0-9]+$"))
                 {
                     int var = variableEvaluator(token);
 
                     if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
+
                         if (vals.Count == 0)
                         {
                             throw new ArgumentException();
                         }
 
                         int val = vals.Pop();
-                        string op = operators.Pop();
-                        if (op == "*")
-                        {
-                            vals.Push(val * var);
-                        }
-                        else
-                        {
-                            if (var == 0)
-                            {
-                                throw new ArgumentException();
-                            }
-                            vals.Push(val / var);
-                        }
+
+                        MultiplyOrDivide(val, var, vals, operators);
                     }
 
                     else
@@ -134,23 +165,13 @@ namespace FormulaEvaluator
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
+
                         if (vals.Count < 2)
                         {
                             throw new ArgumentException();   
                         }
 
-                        int val1 = vals.Pop();
-                        int val2 = vals.Pop();
-                        string op = operators.Pop();
-
-                        if (op == "+")
-                        {
-                            vals.Push(val2 + val1);
-                        }
-                        else
-                        {
-                            vals.Push(val2 - val1);
-                        }
+                        AddOrSubtract(vals, operators);
                     }
 
                     operators.Push(token);
@@ -164,35 +185,18 @@ namespace FormulaEvaluator
                 }
 
 
-                // if token is (
-                //if (token == "(")
-                //{
-                //    operators.Push(token);
-                //}
-
-
                 // else if token is )
                 else if (token == ")")
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
+
                         if (vals.Count < 2)
                         {
                             throw new ArgumentException();
                         }
 
-                        int val1 = vals.Pop();
-                        int val2 = vals.Pop();
-                        string op = operators.Pop();
-
-                        if (op == "+")
-                        {
-                            vals.Push(val2 + val1);
-                        }
-                        else
-                        {
-                            vals.Push(val2 - val1);
-                        }
+                        AddOrSubtract(vals, operators);
                     }
 
                     if ((operators.Count > 0 && operators.Peek() != "(") || operators.Count == 0)
@@ -210,20 +214,8 @@ namespace FormulaEvaluator
 
                         int val1 = vals.Pop();
                         int val2 = vals.Pop();
-                        string op = operators.Pop();
 
-                        if (op == "*")
-                        {
-                            vals.Push(val2 * val1);
-                        }
-                        else
-                        {
-                            if (val2 == 0)
-                            {
-                                throw new ArgumentException();
-                            }
-                            vals.Push(val2 / val1);
-                        }
+                        MultiplyOrDivide(val2, val1, vals, operators);
                     }
                 }
 
