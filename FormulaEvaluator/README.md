@@ -1,9 +1,9 @@
 ﻿Author:			Hannah Larsen
 Partner:		None
-Date:			1/13/2023 7:00 pm
 Course:			CS3500, University of Utah, School of Computing
 GitHub ID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
+Date:			19-Jan-2023 2:35 PM
 Project:		FormulaEvaluator
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 
@@ -18,7 +18,7 @@ No additional write up was required by this assignment.
 
 # Consulted Peers:
 
-I did not consult with any peers on this assignment because I tend to like struggling through a problem on my
+I did not consult with any peers on this project because I tend to like struggling through a problem on my
 own until I have tried everything I can think of, and on this particular assignment, I was able to solve all the
 problems I ran into without running out of ideas, so I therefore did not end up consulting others for help.
 

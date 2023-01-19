@@ -1,28 +1,22 @@
-﻿/// <summary>
-/// Author:      Hannah Larsen
-/// Partner:     None
-/// Date:
-/// Course:      CS3500, University of Utah, School of Computing
-/// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
-/// 
-/// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
-/// All references used in the completion of the assignment are cited in my README file.
-/// 
-/// File Contents:
-/// This file contains a library class with an Evaluate method that will evaluate and return the integer result of any
-/// valid mathematical expression (without negative integers) that is passed in (variables can be included).
-/// 
-/// </summary>
-
-using System.Collections;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace FormulaEvaluator
 {
     /// <summary>
-    /// This library class includes a sole method called Evaluate that takes in a string representing a mathematical
-    /// expression and a delegate that can look up the value associated with any variables that may be within said
-    /// mathematical expression, and returns the integer that the input expression evaluates to.
+    /// Author:      Hannah Larsen
+    /// Partner:     None
+    /// Date:
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+    /// 
+    /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+    /// All references used in the completion of the assignment are cited in my README file.
+    /// 
+    /// File Contents:
+    /// This file contains a library class with an Evaluate method that will evaluate and return the integer result of any
+    /// valid mathematical expression using only positive integers and the +, -, *, /, (, and ) operators. Variables may be also 
+    /// be included, and their values will be looked up using a delegate.
+    /// 
     /// </summary>
     public static class Evaluator
     {
@@ -34,8 +28,9 @@ namespace FormulaEvaluator
         /// <returns> Returns the integer value the variable represents. </returns>
         public delegate int Lookup(String variable_name);
 
+
         /// <summary>
-        /// This is a helper function for the Evaluate algorithm that takes in two integer operands, a value stack, 
+        /// This is a private helper method for the Evaluate algorithm that takes in two integer operands, a value stack, 
         /// and an operator stack, either multiplies or divides the two operands (depending on what is on top 
         /// of the operator stack), and finally pushes the result onto the value stack.
         /// </summary>
@@ -62,8 +57,9 @@ namespace FormulaEvaluator
             }
         }
 
+
         /// <summary>
-        /// This is a helper function for the Evaluate algorithm that takes in a value stack and an operator stack, 
+        /// This is a private helper method for the Evaluate algorithm that takes in a value stack and an operator stack, 
         /// pops 2 values off the value stack, either adds or subtracts the two values (depending on what is on top 
         /// of the operator stack), and finally pushes the result onto the value stack.
         /// </summary>
@@ -84,6 +80,7 @@ namespace FormulaEvaluator
                 vals.Push(val2 - val1);
             }
         }
+
 
         /// <summary>
         /// This method takes in an infix expression to be evaluated and a delegate to look up the value
@@ -138,17 +135,20 @@ namespace FormulaEvaluator
                         // apply the top of the operator stack to the popped value and the token
                         MultiplyOrDivide(val, result, vals, operators);
                     }
-
                     else
                     {
                         vals.Push(result);
                     }
                 }
 
-
                 // else if the token is a variable
                 else if (Regex.IsMatch(token, "^[a-zA-Z]+[0-9]+$"))
                 {
+                    if (variableEvaluator == null)
+                    {
+                        throw new ArgumentException();
+                    }
+
                     // use the delegate to get the value of the variable
                     int var = variableEvaluator(token);
 
@@ -165,30 +165,26 @@ namespace FormulaEvaluator
                         // apply the top of the operator stack to the popped value and the variable value
                         MultiplyOrDivide(val, var, vals, operators);
                     }
-
                     else
                     {
                         vals.Push(var);
                     }
                 }
 
-
                 // else if the token is + or -
                 else if (token == "+" || token == "-")
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
-
                         // make sure the value stack is able to be popped twice
                         if (vals.Count < 2)
                         {
-                            throw new ArgumentException();   
+                            throw new ArgumentException();
                         }
 
                         // apply the top of the operator stack to the top 2 values of the vals stack
                         AddOrSubtract(vals, operators);
                     }
-
                     operators.Push(token);
                 }
 
@@ -205,7 +201,6 @@ namespace FormulaEvaluator
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
-
                         // make sure the value stack is able to be popped twice
                         if (vals.Count < 2)
                         {
