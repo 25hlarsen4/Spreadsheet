@@ -1,9 +1,9 @@
 ﻿/// <summary>
-/// Author:    Hannah Larsen
-/// Partner:    None
+/// Author:      Hannah Larsen
+/// Partner:     None
 /// Date:
-/// Course:    CS3500, University of Utah, School of Computing
-/// Copyright:     CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+/// Course:      CS3500, University of Utah, School of Computing
+/// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 /// 
 /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
 /// All references used in the completion of the assignment are cited in my README file.
@@ -53,6 +53,7 @@ namespace FormulaEvaluator
             }
             else
             {
+                // make sure division by zero does not occur
                 if (operand2 == 0)
                 {
                     throw new ArgumentException();
@@ -96,28 +97,37 @@ namespace FormulaEvaluator
         /// invalid or if division by zero occurs. </exception>
         public static int Evaluate(String expression, Lookup variableEvaluator)
         {
+            if (expression == null)
+            {
+                throw new ArgumentException();
+            }
+
+            // split the input expression into separate tokens and get rid of whitespace in each
             string[] tokens = Regex.Split(expression, "(\\()|(\\))|(-)|(\\+)|(\\*)|(/)");
             for (int i = 0; i < tokens.Length; i++)
             {
                 tokens[i] = tokens[i].Trim();
             }
 
+            // these stacks will hold the numerical values and operators of the input expression, respectively
             Stack<int> vals = new Stack<int>();
             Stack<string> operators = new Stack<string>();
 
+            // process each token in order
             foreach (string token in tokens)
             {
+                // if the token is an empty string due to whitespaces in the input expression, ignore it
                 if (token == "")
                 {
                     continue;
                 }
 
-                // if token is int
+                // if the token is an int
                 else if (int.TryParse(token, out int result))
                 {
                     if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
-
+                        // make sure the value stack is able to be popped
                         if (vals.Count == 0)
                         {
                             throw new ArgumentException();
@@ -125,6 +135,7 @@ namespace FormulaEvaluator
 
                         int val = vals.Pop();
 
+                        // apply the top of the operator stack to the popped value and the token
                         MultiplyOrDivide(val, result, vals, operators);
                     }
 
@@ -135,14 +146,15 @@ namespace FormulaEvaluator
                 }
 
 
-                // else if token is a variable "[a-zA-Z]+[0-9]+"
+                // else if the token is a variable
                 else if (Regex.IsMatch(token, "^[a-zA-Z]+[0-9]+$"))
                 {
+                    // use the delegate to get the value of the variable
                     int var = variableEvaluator(token);
 
                     if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
-
+                        // make sure the value stack is able to be popped
                         if (vals.Count == 0)
                         {
                             throw new ArgumentException();
@@ -150,6 +162,7 @@ namespace FormulaEvaluator
 
                         int val = vals.Pop();
 
+                        // apply the top of the operator stack to the popped value and the variable value
                         MultiplyOrDivide(val, var, vals, operators);
                     }
 
@@ -160,17 +173,19 @@ namespace FormulaEvaluator
                 }
 
 
-                // else if token is + or -
+                // else if the token is + or -
                 else if (token == "+" || token == "-")
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
 
+                        // make sure the value stack is able to be popped twice
                         if (vals.Count < 2)
                         {
                             throw new ArgumentException();   
                         }
 
+                        // apply the top of the operator stack to the top 2 values of the vals stack
                         AddOrSubtract(vals, operators);
                     }
 
@@ -178,27 +193,30 @@ namespace FormulaEvaluator
                 }
 
 
-                // else if token is * or / or (
+                // else if the token is * or / or (
                 else if (token == "*" || token == "/" || token == "(")
                 {
                     operators.Push(token);
                 }
 
 
-                // else if token is )
+                // else if the token is )
                 else if (token == ")")
                 {
                     if (operators.Count > 0 && (operators.Peek() == "+" || operators.Peek() == "-"))
                     {
 
+                        // make sure the value stack is able to be popped twice
                         if (vals.Count < 2)
                         {
                             throw new ArgumentException();
                         }
 
+                        // apply the top of the operator stack to the top 2 values of the vals stack
                         AddOrSubtract(vals, operators);
                     }
 
+                    // the top of the operators stack should now be a (
                     if ((operators.Count > 0 && operators.Peek() != "(") || operators.Count == 0)
                     {
                         throw new ArgumentException();
@@ -207,6 +225,7 @@ namespace FormulaEvaluator
 
                     if (operators.Count > 0 && (operators.Peek() == "*" || operators.Peek() == "/"))
                     {
+                        // make sure the value stack is able to be popped twice
                         if (vals.Count < 2)
                         {
                             throw new ArgumentException();
@@ -215,6 +234,7 @@ namespace FormulaEvaluator
                         int val1 = vals.Pop();
                         int val2 = vals.Pop();
 
+                        // apply the top of the operator stack to the 2 popped values
                         MultiplyOrDivide(val2, val1, vals, operators);
                     }
                 }
@@ -227,22 +247,25 @@ namespace FormulaEvaluator
 
             }
 
-
-            // when the last token has been processed
+            // when the last token has been processed:
 
             // if the operator stack is empty
             if (operators.Count == 0)
             {
+                // make sure the value stack has only one value in it and return it
                 if (vals.Count != 1)
                 {
                     throw new ArgumentException();
                 }
+
                 return vals.Pop();
             }
 
             // if the operator stack is not empty
             else
             {
+                // make sure the operator stack has exactly 1 operator left and the value stack has
+                // exactly 2 values left
                 if (operators.Count != 1 || vals.Count != 2)
                 {
                     throw new ArgumentException();
@@ -252,6 +275,7 @@ namespace FormulaEvaluator
                 int val2 = vals.Pop();
                 string op = operators.Pop();
 
+                // apply the leftover operator to the leftover values and return the result
                 if (op == "+")
                 {
                     return val2 + val1;
