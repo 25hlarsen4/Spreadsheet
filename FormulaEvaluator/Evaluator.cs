@@ -5,7 +5,7 @@ namespace FormulaEvaluator
     /// <summary>
     /// Author:      Hannah Larsen
     /// Partner:     None
-    /// Date:
+    /// Date:        13-Jan-2023
     /// Course:      CS3500, University of Utah, School of Computing
     /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
     /// 
@@ -14,8 +14,8 @@ namespace FormulaEvaluator
     /// 
     /// File Contents:
     /// This file contains a library class with an Evaluate method that will evaluate and return the integer result of any
-    /// valid mathematical expression using only positive integers and the +, -, *, /, (, and ) operators. Variables may be also 
-    /// be included, and their values will be looked up using a delegate.
+    /// valid mathematical infix expression using only positive integers and the +, -, *, /, (, and ) operators. Variables 
+    /// may be also be included, and their values will be looked up using a delegate.
     /// 
     /// </summary>
     public static class Evaluator
@@ -26,7 +26,7 @@ namespace FormulaEvaluator
         /// </summary>
         /// <param name="variable_name"> variable_name represents the variable to look up the value of. </param>
         /// <returns> Returns the integer value the variable represents. </returns>
-        public delegate int Lookup(String variable_name);
+        public delegate int Lookup(String variableName);
 
 
         /// <summary>

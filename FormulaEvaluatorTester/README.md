@@ -3,7 +3,7 @@ Partner:		None
 Course:			CS3500, University of Utah, School of Computing
 GitHub ID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-Date:			19-Jan-2023 2:35 PM
+Date:			19-Jan-2023 8:20 PM
 Project:		FormulaEvaluatorTester
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 
