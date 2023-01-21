@@ -114,7 +114,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            return dependents[s];
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            return dependees[s];
         }
 
 
@@ -142,6 +142,7 @@ namespace SpreadsheetUtilities
             if (!dependentValue.Contains(t)) 
             {
                 dependentValue.AddLast(t);
+                size++;
             }
 
             LinkedList<string> dependeeValue = dependees[t];
@@ -163,6 +164,7 @@ namespace SpreadsheetUtilities
             if (dependentValue.Contains(t))
             {
                 dependentValue.Remove(t);
+                size--;
             }
 
             LinkedList<string> dependeeValue = dependees[t];
@@ -179,6 +181,19 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            foreach (string oldDependent in dependents[s])
+            {
+                dependees[oldDependent].Remove(s);
+                size--;
+            }
+            dependents[s].Clear();
+
+            foreach (string newDependent in newDependents)
+            {
+                dependents[s].AddFirst(newDependent);
+                size++;
+                dependees[newDependent].AddFirst(s);
+            }
         }
 
 
@@ -188,6 +203,19 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
+            foreach (string oldDependee in dependees[s])
+            {
+                dependents[oldDependee].Remove(s);
+                size--;
+            }
+            dependees[s].Clear();
+
+            foreach (string newDependee in newDependees)
+            {
+                dependees[s].AddFirst(newDependee);
+                dependents[newDependee].AddFirst(s);
+                size++;
+            }
         }
 
     }
