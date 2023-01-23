@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetUtilities;
@@ -77,7 +78,7 @@ namespace DevelopmentTests
 
 
         ///<summary>
-        ///It should be possibe to have more than one DG at a time.
+        ///It should be possible to have more than one DG at a time.
         ///</summary>
         [TestMethod()]
         public void StaticTest()
@@ -142,8 +143,6 @@ namespace DevelopmentTests
         }
 
 
-
-
         /// <summary>
         ///Non-empty graph contains something
         ///</summary>
@@ -182,6 +181,66 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
         }
 
+
+        /// <summary>
+        ///Non-empty graph contains something
+        ///</summary>
+        [TestMethod()]
+        public void ReplaceDependentsTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "z");
+            t.AddDependency("a", "d");
+            Assert.AreEqual(3, t.Size);
+            HashSet<string> set = new HashSet<String>() { "c", "s", "f", "p" };
+            t.ReplaceDependents("a", set);
+            Assert.AreEqual(4, t.Size);
+
+            IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
+            Assert.IsTrue(e.MoveNext());
+            String s1 = e.Current;
+            Assert.IsTrue(e.MoveNext());
+            String s2 = e.Current;
+            Assert.IsTrue(e.MoveNext());
+            String s3 = e.Current;
+            Assert.IsTrue(e.MoveNext());
+            String s4 = e.Current;
+            Assert.IsFalse(e.MoveNext());
+            Assert.IsTrue((s1 == "p") && (s2 == "f") && (s3 == "s") && (s4 == "c"));
+
+            foreach (string s in set)
+            { 
+                ArrayList listOfDependees = new ArrayList();
+                IEnumerator<string> dependees = t.GetDependees(s).GetEnumerator();
+                while (dependees.MoveNext())
+                {
+                    listOfDependees.Add(dependees.Current);
+                }
+                Assert.IsTrue(listOfDependees.Contains("a"));
+            }
+        }
+
+
+        /// <summary>
+        ///Non-empty graph contains something
+        ///</summary>
+        [TestMethod()]
+        public void ReplaceDependentsDependeeNotInGraphTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            Assert.AreEqual(0, t.Size);
+            t.ReplaceDependents("a", new HashSet<string>() { "c", "s" });
+            Assert.AreEqual(2, t.Size);
+
+            IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
+            Assert.IsTrue(e.MoveNext());
+            String s1 = e.Current;
+            Assert.IsTrue(e.MoveNext());
+            String s2 = e.Current;
+            Assert.IsFalse(e.MoveNext());
+            Assert.IsTrue((s1 == "s") && (s2 == "c"));
+        }
 
 
         /// <summary>
