@@ -117,7 +117,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return dependents[s];
+            if (dependents.ContainsKey(s))
+            {
+                return dependents[s];
+            }
+
+            return new LinkedList<string>();
         }
 
         /// <summary>
@@ -125,7 +130,12 @@ namespace SpreadsheetUtilities
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return dependees[s];
+            if (dependees.ContainsKey(s))
+            {
+                return dependees[s];
+            }
+
+            return new LinkedList<string>();
         }
 
 
@@ -256,10 +266,20 @@ namespace SpreadsheetUtilities
                 dependents[s].Clear();
             }
 
+            else
+            {
+                dependents.Add(s, new LinkedList<string>());
+            }
+
             foreach (string newDependent in newDependents)
             {
                 dependents[s].AddFirst(newDependent);
                 size++;
+
+                if (!dependees.ContainsKey(newDependent))
+                {
+                    dependees.Add(newDependent, new LinkedList<string>());
+                }
                 dependees[newDependent].AddFirst(s);
             }
         }
@@ -281,11 +301,22 @@ namespace SpreadsheetUtilities
                 dependees[s].Clear();
             }
 
+            else
+            {
+                dependees.Add(s, new LinkedList<string>());
+            }
+
             foreach (string newDependee in newDependees)
             {
                 dependees[s].AddFirst(newDependee);
-                dependents[newDependee].AddFirst(s);
                 size++;
+
+                if (!dependents.ContainsKey(newDependee))
+                {
+                    dependents.Add(newDependee, new LinkedList<string>());
+                }
+                dependents[newDependee].AddFirst(s);
+                
             }
         }
 
