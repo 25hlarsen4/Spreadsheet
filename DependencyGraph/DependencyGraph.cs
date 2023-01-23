@@ -80,14 +80,7 @@ namespace SpreadsheetUtilities
         /// </summary>
         public int this[string s]
         {
-            //LinkedList<string> value = new LinkedList<string>();
-            //if (dependees.TryGetValue(s, out value)) 
-            //{
-            //   return value.size(); 
-            //}
-
-          
-            get { return dependees[s].Count; }
+            get { if (!dependees.ContainsKey(s)) return 0; else return dependees[s].Count; }
         }
 
 
@@ -96,6 +89,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependents(string s)
         {
+            if (!dependents.ContainsKey(s))
+            {
+                return false;
+            }
+
             return dependents[s].Count != 0;
         }
 
@@ -105,6 +103,11 @@ namespace SpreadsheetUtilities
         /// </summary>
         public bool HasDependees(string s)
         {
+            if (!dependees.ContainsKey(s))
+            {
+                return false;
+            }
+
             return dependees[s].Count != 0;
         }
 
@@ -138,18 +141,71 @@ namespace SpreadsheetUtilities
         /// <param name="t"> t cannot be evaluated until s is</param>        /// 
         public void AddDependency(string s, string t)
         {
-            LinkedList<string> dependentValue = dependents[s];
-            if (!dependentValue.Contains(t)) 
+
+            // if s is not in the dependents dictionary, then you know the dependency
+            // does not already exist
+            if (!dependents.ContainsKey(s))
             {
-                dependentValue.AddLast(t);
+                dependents.Add(s, new LinkedList<string>());
+                dependents[s].AddFirst(t);
                 size++;
+
+                // now check if we have to make a new entry for t in the dependees dictionary, 
+                // or if we just have to add s to t's already existing list of dependees
+                if (!dependees.ContainsKey(t))
+                {
+                    dependees.Add(t, new LinkedList<string>());
+                    dependees[t].AddFirst(s);
+                }
+
+                // we now know that t is in the dependees dictionary, but we must add s to its
+                // list of dependees
+                else
+                {
+                    LinkedList<string> dependeeList = dependees[t];
+                    dependeeList.AddFirst(s);
+                }
             }
 
-            LinkedList<string> dependeeValue = dependees[t];
-            if (!dependeeValue.Contains(s))
+            // if s is already in the dependents dictionary
+            else
             {
-                dependeeValue.AddLast(s);
+                LinkedList<string> dependentList = dependents[s];
+
+                // first make sure that the dependency doesn't already exist
+                if (!dependentList.Contains(t))
+                {
+                    dependentList.AddFirst(t);
+                    size++;
+
+                    if (!dependees.ContainsKey(t))
+                    {
+                        dependees.Add(t, new LinkedList<string>());
+                        dependees[t].AddFirst(s);
+                    }
+
+                    else
+                    {
+                        LinkedList<string> dependeeList = dependees[t];
+                        dependeeList.AddFirst(s);
+                    }
+                }
             }
+
+            //if (!dependees.ContainsKey(t))
+            //{
+            //    dependees.Add(t, new LinkedList<string>());
+            //    dependees[t].AddFirst(s);
+            //}
+
+            //else
+            //{
+            //    LinkedList<string> dependeeList = dependees[t];
+            //    if (!dependeeList.Contains(s))
+            //    {
+            //        dependeeList.AddLast(s);
+            //    }
+            //}
         }
 
 
@@ -160,18 +216,27 @@ namespace SpreadsheetUtilities
         /// <param name="t"></param>
         public void RemoveDependency(string s, string t)
         {
-            LinkedList<string> dependentValue = dependents[s];
-            if (dependentValue.Contains(t))
+            if (dependents.ContainsKey(s))
             {
-                dependentValue.Remove(t);
-                size--;
+                if (dependents[s].Remove(t))
+                {
+                    size--;
+                    dependees[t].Remove(s);
+                }
             }
 
-            LinkedList<string> dependeeValue = dependees[t];
-            if (dependeeValue.Contains(s))
-            {
-                dependeeValue.Remove(s);
-            }
+            //LinkedList<string> dependentValue = dependents[s];
+            //if (dependentValue.Contains(t))
+            //{
+            //    dependentValue.Remove(t);
+            //    size--;
+            //}
+
+            //LinkedList<string> dependeeValue = dependees[t];
+            //if (dependeeValue.Contains(s))
+            //{
+            //    dependeeValue.Remove(s);
+            //}
         }
 
 
@@ -181,12 +246,15 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
-            foreach (string oldDependent in dependents[s])
+            if (dependents.ContainsKey(s))
             {
-                dependees[oldDependent].Remove(s);
-                size--;
+                foreach (string oldDependent in dependents[s])
+                {
+                    dependees[oldDependent].Remove(s);
+                    size--;
+                }
+                dependents[s].Clear();
             }
-            dependents[s].Clear();
 
             foreach (string newDependent in newDependents)
             {
@@ -203,12 +271,15 @@ namespace SpreadsheetUtilities
         /// </summary>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
-            foreach (string oldDependee in dependees[s])
+            if (dependees.ContainsKey(s))
             {
-                dependents[oldDependee].Remove(s);
-                size--;
+                foreach (string oldDependee in dependees[s])
+                {
+                    dependents[oldDependee].Remove(s);
+                    size--;
+                }
+                dependees[s].Clear();
             }
-            dependees[s].Clear();
 
             foreach (string newDependee in newDependees)
             {
