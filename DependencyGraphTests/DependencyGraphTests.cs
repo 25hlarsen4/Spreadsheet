@@ -17,8 +17,8 @@ namespace DevelopmentTests
     {
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the indexer method in a basic case.
+        /// </summary>
         [TestMethod()]
         public void IndexerTest()
         {
@@ -31,8 +31,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the indexer method in the case that the input
+        /// has no dependees.
+        /// </summary>
         [TestMethod()]
         public void NonexistentNodeIndexerTest()
         {
@@ -45,8 +46,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the HasDependents method in the case that
+        /// it returns true.
+        /// </summary>
         [TestMethod()]
         public void HasDependentsTrueTest()
         {
@@ -59,8 +61,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the HasDependents method in the case that
+        /// it returns false.
+        /// </summary>
         [TestMethod()]
         public void HasDependentsFalseTest()
         {
@@ -73,8 +76,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the HasDependents method in the case that it is 
+        /// called with an input node that does not exists in the graph.
+        /// </summary>
         [TestMethod()]
         public void NonexistentNodeHasDependentsTest()
         {
@@ -87,8 +91,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the HasDependees method in the case that
+        /// it returns true.
+        /// </summary>
         [TestMethod()]
         public void HasDependeesTrueTest()
         {
@@ -101,8 +106,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the HasDependees method in the case that
+        /// it returns false.
+        /// </summary>
         [TestMethod()]
         public void HasDependeesFalseTest()
         {
@@ -115,8 +121,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the HasDependees method in the case that it is 
+        /// called with an input node that does not exists in the graph.
+        /// </summary>
         [TestMethod()]
         public void NonexistentNodeHasDependeesTest()
         {
@@ -129,7 +136,7 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
+        /// This tests the Size method on an empty graph.
         ///</summary>
         [TestMethod()]
         public void SimpleEmptyTest()
@@ -140,8 +147,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the AddDependency method in a basic case.
+        /// </summary>
         [TestMethod()]
         public void AddDependencyTest()
         {
@@ -156,8 +163,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests that you cannot add duplicate dependencies.
+        /// </summary>
         [TestMethod()]
         public void AddDuplicateDependencyTest()
         {
@@ -180,8 +187,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the RemoveDependency method in a basic case.
+        /// </summary>
         [TestMethod()]
         public void SimpleEmptyRemoveTest()
         {
@@ -194,8 +201,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests the RemoveDependency method in the case that
+        /// a dependency is still left within the graph.
+        /// </summary>
         [TestMethod()]
         public void RemoveDependencyTest()
         {
@@ -209,8 +217,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// This tests that nothing happens when you try to remove
+        /// a dependency that doesn't exist.
+        /// </summary>
         [TestMethod()]
         public void RemoveNonexistentDependencyTest()
         {
@@ -224,8 +233,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Empty graph should contain nothing
-        ///</summary>
+        /// The tests the GetDependents and GetDependees methods.
+        /// </summary>
         [TestMethod()]
         public void EmptyEnumeratorTest()
         {
@@ -244,8 +253,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Replace on an empty DG shouldn't fail
-        ///</summary>
+        /// This tests that replacing on an empty DG should not fail.
+        /// </summary>
         [TestMethod()]
         public void SimpleReplaceTest()
         {
@@ -259,9 +268,9 @@ namespace DevelopmentTests
 
 
 
-        ///<summary>
-        ///It should be possible to have more than one DG at a time.
-        ///</summary>
+        /// <summary>
+        /// This test that it is possible to have more than one DG at a time.
+        /// </summary>
         [TestMethod()]
         public void StaticTest()
         {
@@ -276,8 +285,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the size method.
+        /// </summary>
         [TestMethod()]
         public void SizeTest()
         {
@@ -291,8 +300,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests that nodes' dependents and dependees are
+        /// stored correctly.
+        /// </summary>
         [TestMethod()]
         public void EnumeratorTest()
         {
@@ -326,8 +336,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the ReplaceDependents and ReplaceDependees
+        /// methods in a basic case.
+        /// </summary>
         [TestMethod()]
         public void ReplaceThenEnumerate()
         {
@@ -365,8 +376,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the ReplaceDependents method in the case that 
+        /// the size of the DG grows as a result.
+        /// </summary>
         [TestMethod()]
         public void ReplaceDependentsTest()
         {
@@ -391,8 +403,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the ReplaceDependents method in the case that the
+        /// dependents are replaced with nothing.
+        /// </summary>
         [TestMethod()]
         public void ReplaceDependentsWithEmptySetTest()
         {
@@ -416,8 +429,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the ReplaceDependents method in the case that 
+        /// the dependee is not originally in the DG.
+        /// </summary>
         [TestMethod()]
         public void ReplaceDependentsDependeeNotInGraphTest()
         {
@@ -441,8 +455,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the ReplaceDependees method in the case that 
+        /// the size of the DG shrinks as a result.
+        /// </summary>
         [TestMethod()]
         public void ReplaceDependeesTest()
         {
@@ -466,8 +481,9 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Non-empty graph contains something
-        ///</summary>
+        /// This tests the ReplaceDependees method in the case that 
+        /// the dependent is not originally in the DG.
+        /// </summary>
         [TestMethod()]
         public void ReplaceDependeesDependentNotInGraphTest()
         {
@@ -491,8 +507,8 @@ namespace DevelopmentTests
 
 
         /// <summary>
-        ///Using lots of data
-        ///</summary>
+        /// This tests that you can use lots of data.
+        /// </summary>
         [TestMethod()]
         public void StressTest()
         {
