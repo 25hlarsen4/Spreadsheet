@@ -46,8 +46,8 @@ namespace SpreadsheetUtilities
     public class DependencyGraph
     {
 
-        private Dictionary<string, LinkedList<string>> dependents;
-        private Dictionary<string, LinkedList<string>> dependees;
+        private Dictionary<string, HashSet<string>> dependents;
+        private Dictionary<string, HashSet<string>> dependees;
         private int size;
 
 
@@ -56,8 +56,8 @@ namespace SpreadsheetUtilities
         /// </summary>
         public DependencyGraph()
         {
-            dependents = new Dictionary<string, LinkedList<string>>();
-            dependees = new Dictionary<string, LinkedList<string>>();
+            dependents = new Dictionary<string, HashSet<string>>();
+            dependees = new Dictionary<string, HashSet<string>>();
             size = 0;
         }
 
@@ -122,7 +122,7 @@ namespace SpreadsheetUtilities
                 return dependents[s];
             }
 
-            return new LinkedList<string>();
+            return new HashSet<string>();
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace SpreadsheetUtilities
                 return dependees[s];
             }
 
-            return new LinkedList<string>();
+            return new HashSet<string>();
         }
 
 
@@ -156,48 +156,48 @@ namespace SpreadsheetUtilities
             // does not already exist
             if (!dependents.ContainsKey(s))
             {
-                dependents.Add(s, new LinkedList<string>());
-                dependents[s].AddFirst(t);
+                dependents.Add(s, new HashSet<string>());
+                dependents[s].Add(t);
                 size++;
 
                 // now check if we have to make a new entry for t in the dependees dictionary, 
                 // or if we just have to add s to t's already existing list of dependees
                 if (!dependees.ContainsKey(t))
                 {
-                    dependees.Add(t, new LinkedList<string>());
-                    dependees[t].AddFirst(s);
+                    dependees.Add(t, new HashSet<string>());
+                    dependees[t].Add(s);
                 }
 
                 // we now know that t is in the dependees dictionary, but we must add s to its
                 // list of dependees
                 else
                 {
-                    LinkedList<string> dependeeList = dependees[t];
-                    dependeeList.AddFirst(s);
+                    HashSet<string> dependeeList = dependees[t];
+                    dependeeList.Add(s);
                 }
             }
 
             // if s is already in the dependents dictionary
             else
             {
-                LinkedList<string> dependentList = dependents[s];
+                HashSet<string> dependentList = dependents[s];
 
                 // first make sure that the dependency doesn't already exist
                 if (!dependentList.Contains(t))
                 {
-                    dependentList.AddFirst(t);
+                    dependentList.Add(t);
                     size++;
 
                     if (!dependees.ContainsKey(t))
                     {
-                        dependees.Add(t, new LinkedList<string>());
-                        dependees[t].AddFirst(s);
+                        dependees.Add(t, new HashSet<string>());
+                        dependees[t].Add(s);
                     }
 
                     else
                     {
-                        LinkedList<string> dependeeList = dependees[t];
-                        dependeeList.AddFirst(s);
+                        HashSet<string> dependeeList = dependees[t];
+                        dependeeList.Add(s);
                     }
                 }
             }
@@ -251,7 +251,7 @@ namespace SpreadsheetUtilities
 
 
         /// <summary>
-        /// Removes all existing ordered pairs of the form (s,r) MEANING (s, anything)?????.  Then, for each
+        /// Removes all existing ordered pairs of the form (s,r). Then, for each
         /// t in newDependents, adds the ordered pair (s,t).
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
@@ -263,24 +263,25 @@ namespace SpreadsheetUtilities
                     dependees[oldDependent].Remove(s);
                     size--;
                 }
-                dependents[s].Clear();
+                //dependents[s].Clear();
+                dependents[s] = new HashSet<string>();
             }
 
             else
             {
-                dependents.Add(s, new LinkedList<string>());
+                dependents.Add(s, new HashSet<string>());
             }
 
             foreach (string newDependent in newDependents)
             {
-                dependents[s].AddFirst(newDependent);
+                dependents[s].Add(newDependent);
                 size++;
 
                 if (!dependees.ContainsKey(newDependent))
                 {
-                    dependees.Add(newDependent, new LinkedList<string>());
+                    dependees.Add(newDependent, new HashSet<string>());
                 }
-                dependees[newDependent].AddFirst(s);
+                dependees[newDependent].Add(s);
             }
         }
 
@@ -298,24 +299,25 @@ namespace SpreadsheetUtilities
                     dependents[oldDependee].Remove(s);
                     size--;
                 }
-                dependees[s].Clear();
+                //dependees[s].Clear();
+                dependees[s] = new HashSet<string>();
             }
 
             else
             {
-                dependees.Add(s, new LinkedList<string>());
+                dependees.Add(s, new HashSet<string>());
             }
 
             foreach (string newDependee in newDependees)
             {
-                dependees[s].AddFirst(newDependee);
+                dependees[s].Add(newDependee);
                 size++;
 
                 if (!dependents.ContainsKey(newDependee))
                 {
-                    dependents.Add(newDependee, new LinkedList<string>());
+                    dependents.Add(newDependee, new HashSet<string>());
                 }
-                dependents[newDependee].AddFirst(s);
+                dependents[newDependee].Add(s);
                 
             }
         }
