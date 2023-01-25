@@ -20,10 +20,162 @@ namespace DevelopmentTests
         ///Empty graph should contain nothing
         ///</summary>
         [TestMethod()]
+        public void IndexerTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.AreEqual(2, t["b"]);
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void NonexistentNodeIndexerTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.AreEqual(0, t["a"]);
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void HasDependentsTrueTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.IsTrue(t.HasDependents("c"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void HasDependentsFalseTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.IsFalse(t.HasDependents("b"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void NonexistentNodeHasDependentsTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.IsFalse(t.HasDependents("p"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void HasDependeesTrueTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.IsTrue(t.HasDependees("d"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void HasDependeesFalseTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.IsFalse(t.HasDependees("a"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void NonexistentNodeHasDependeesTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("d", "b");
+            Assert.IsFalse(t.HasDependents("p"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
         public void SimpleEmptyTest()
         {
             DependencyGraph t = new DependencyGraph();
             Assert.AreEqual(0, t.Size);
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void AddDependencyTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            Assert.AreEqual(0, t.Size);
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+
+            Assert.IsTrue(t.GetDependents("a").Contains("b"));
+            Assert.IsTrue(t.GetDependees("b").Contains("a"));
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void AddDuplicateDependencyTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+            t.AddDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+
+            IEnumerator<string> e1 = t.GetDependents("a").GetEnumerator();
+            Assert.IsTrue(e1.MoveNext());
+            Assert.AreEqual("b", e1.Current);
+            Assert.IsFalse(e1.MoveNext());
+
+            IEnumerator<string> e2 = t.GetDependees("b").GetEnumerator();
+            Assert.IsTrue(e2.MoveNext());
+            Assert.AreEqual("a", e2.Current);
+            Assert.IsFalse(e2.MoveNext());
         }
 
 
@@ -38,6 +190,36 @@ namespace DevelopmentTests
             Assert.AreEqual(1, t.Size);
             t.RemoveDependency("x", "y");
             Assert.AreEqual(0, t.Size);
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void RemoveDependencyTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("x", "y");
+            t.AddDependency("a", "b");
+            Assert.AreEqual(2, t.Size);
+            t.RemoveDependency("a", "b");
+            Assert.AreEqual(1, t.Size);
+        }
+
+
+        /// <summary>
+        ///Empty graph should contain nothing
+        ///</summary>
+        [TestMethod()]
+        public void RemoveNonexistentDependencyTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("x", "y");
+            t.AddDependency("a", "b");
+            Assert.AreEqual(2, t.Size);
+            t.RemoveDependency("b", "a");
+            Assert.AreEqual(2, t.Size);
         }
 
 
@@ -190,35 +372,46 @@ namespace DevelopmentTests
         {
             DependencyGraph t = new DependencyGraph();
             t.AddDependency("a", "b");
-            t.AddDependency("a", "z");
-            t.AddDependency("a", "d");
-            Assert.AreEqual(3, t.Size);
-            HashSet<string> set = new HashSet<String>() { "c", "s", "f", "p" };
+            Assert.AreEqual(1, t.Size);
+            HashSet<string> set = new HashSet<String>() { "c", "s" };
             t.ReplaceDependents("a", set);
-            Assert.AreEqual(4, t.Size);
+            Assert.AreEqual(2, t.Size);
 
             IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
             Assert.IsTrue(e.MoveNext());
             String s2 = e.Current;
-            Assert.IsTrue(e.MoveNext());
-            String s3 = e.Current;
-            Assert.IsTrue(e.MoveNext());
-            String s4 = e.Current;
             Assert.IsFalse(e.MoveNext());
-            Assert.IsTrue((s1 == "p") && (s2 == "f") && (s3 == "s") && (s4 == "c"));
+            Assert.IsTrue(((s1 == "c") && (s2 == "s")) || ((s1 == "s") && (s2 == "c")));
 
-            foreach (string s in set)
-            { 
-                ArrayList listOfDependees = new ArrayList();
-                IEnumerator<string> dependees = t.GetDependees(s).GetEnumerator();
-                while (dependees.MoveNext())
-                {
-                    listOfDependees.Add(dependees.Current);
-                }
-                Assert.IsTrue(listOfDependees.Contains("a"));
-            }
+            Assert.IsTrue(t.GetDependees("c").Contains("a"));
+            Assert.IsTrue(t.GetDependees("s").Contains("a"));
+        }
+
+
+        /// <summary>
+        ///Non-empty graph contains something
+        ///</summary>
+        [TestMethod()]
+        public void ReplaceDependentsWithEmptySetTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "z");
+            t.AddDependency("a", "d");
+            t.AddDependency("b", "d");
+            Assert.AreEqual(4, t.Size);
+            HashSet<string> set = new HashSet<String>();
+            t.ReplaceDependents("a", set);
+            Assert.AreEqual(1, t.Size);
+
+            IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
+            Assert.IsFalse(e.MoveNext());
+
+            Assert.IsFalse(t.GetDependees("b").Contains("a"));
+            Assert.IsFalse(t.GetDependees("z").Contains("a"));
+            Assert.IsFalse(t.GetDependees("d").Contains("a"));
         }
 
 
@@ -230,7 +423,8 @@ namespace DevelopmentTests
         {
             DependencyGraph t = new DependencyGraph();
             Assert.AreEqual(0, t.Size);
-            t.ReplaceDependents("a", new HashSet<string>() { "c", "s" });
+            HashSet<string> set = new HashSet<string>() { "c", "s" };
+            t.ReplaceDependents("a", set);
             Assert.AreEqual(2, t.Size);
 
             IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
@@ -239,7 +433,60 @@ namespace DevelopmentTests
             Assert.IsTrue(e.MoveNext());
             String s2 = e.Current;
             Assert.IsFalse(e.MoveNext());
-            Assert.IsTrue((s1 == "s") && (s2 == "c"));
+            Assert.IsTrue(((s1 == "c") && (s2 == "s")) || ((s1 == "s") && (s2 == "c")));
+
+            Assert.IsTrue(t.GetDependees("c").Contains("a"));
+            Assert.IsTrue(t.GetDependees("s").Contains("a"));
+        }
+
+
+        /// <summary>
+        ///Non-empty graph contains something
+        ///</summary>
+        [TestMethod()]
+        public void ReplaceDependeesTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("a", "z");
+            t.AddDependency("c", "b");
+            Assert.AreEqual(3, t.Size);
+            HashSet<string> set = new HashSet<String>() { "p" };
+            t.ReplaceDependees("b", set);
+            Assert.AreEqual(2, t.Size);
+
+            IEnumerator<string> e = t.GetDependees("b").GetEnumerator();
+            Assert.IsTrue(e.MoveNext());
+            String s1 = e.Current;
+            Assert.IsFalse(e.MoveNext());
+            Assert.IsTrue(s1 == "p");
+
+            Assert.IsTrue(t.GetDependents("p").Contains("b"));
+        }
+
+
+        /// <summary>
+        ///Non-empty graph contains something
+        ///</summary>
+        [TestMethod()]
+        public void ReplaceDependeesDependentNotInGraphTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            Assert.AreEqual(0, t.Size);
+            HashSet<string> set = new HashSet<string>() { "c", "s" };
+            t.ReplaceDependees("a", set);
+            Assert.AreEqual(2, t.Size);
+
+            IEnumerator<string> e = t.GetDependees("a").GetEnumerator();
+            Assert.IsTrue(e.MoveNext());
+            String s1 = e.Current;
+            Assert.IsTrue(e.MoveNext());
+            String s2 = e.Current;
+            Assert.IsFalse(e.MoveNext());
+            Assert.IsTrue(((s1 == "c") && (s2 == "s")) || ((s1 == "s") && (s2 == "c")));
+
+            Assert.IsTrue(t.GetDependents("c").Contains("a"));
+            Assert.IsTrue(t.GetDependents("s").Contains("a"));
         }
 
 
