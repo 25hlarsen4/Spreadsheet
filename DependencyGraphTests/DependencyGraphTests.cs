@@ -157,6 +157,7 @@ namespace DevelopmentTests
             t.AddDependency("a", "b");
             Assert.AreEqual(1, t.Size);
 
+            // check that the dependents and dependees were updated accordingly
             Assert.IsTrue(t.GetDependents("a").Contains("b"));
             Assert.IsTrue(t.GetDependees("b").Contains("a"));
         }
@@ -174,11 +175,13 @@ namespace DevelopmentTests
             t.AddDependency("a", "b");
             Assert.AreEqual(1, t.Size);
 
+            // check that the dependents of a did not change
             IEnumerator<string> e1 = t.GetDependents("a").GetEnumerator();
             Assert.IsTrue(e1.MoveNext());
             Assert.AreEqual("b", e1.Current);
             Assert.IsFalse(e1.MoveNext());
 
+            // check that the dependees of b did not change
             IEnumerator<string> e2 = t.GetDependees("b").GetEnumerator();
             Assert.IsTrue(e2.MoveNext());
             Assert.AreEqual("a", e2.Current);
@@ -247,6 +250,8 @@ namespace DevelopmentTests
             Assert.IsTrue(e2.MoveNext());
             Assert.AreEqual("y", e2.Current);
             t.RemoveDependency("x", "y");
+
+            // check that the pair was removed correctly
             Assert.IsFalse(t.GetDependees("y").GetEnumerator().MoveNext());
             Assert.IsFalse(t.GetDependents("x").GetEnumerator().MoveNext());
         }
@@ -267,9 +272,8 @@ namespace DevelopmentTests
         }
 
 
-
         /// <summary>
-        /// This test that it is possible to have more than one DG at a time.
+        /// This tests that it is possible to have more than one DG at a time.
         /// </summary>
         [TestMethod()]
         public void StaticTest()
@@ -280,8 +284,6 @@ namespace DevelopmentTests
             Assert.AreEqual(1, t1.Size);
             Assert.AreEqual(0, t2.Size);
         }
-
-
 
 
         /// <summary>
@@ -312,9 +314,11 @@ namespace DevelopmentTests
             t.AddDependency("c", "b");
             t.AddDependency("b", "d");
 
+            // check that a has no dependees
             IEnumerator<string> e = t.GetDependees("a").GetEnumerator();
             Assert.IsFalse(e.MoveNext());
 
+            // check that b's dependees are a and c
             e = t.GetDependees("b").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
@@ -323,11 +327,13 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
             Assert.IsTrue(((s1 == "a") && (s2 == "c")) || ((s1 == "c") && (s2 == "a")));
 
+            // check that c's dependee is a
             e = t.GetDependees("c").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             Assert.AreEqual("a", e.Current);
             Assert.IsFalse(e.MoveNext());
 
+            // check that d's dependee is b
             e = t.GetDependees("d").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             Assert.AreEqual("b", e.Current);
@@ -352,9 +358,11 @@ namespace DevelopmentTests
             t.ReplaceDependees("b", new HashSet<string>() { "a", "c" });
             t.ReplaceDependees("d", new HashSet<string>() { "b" });
 
+            // check that a has no dependees
             IEnumerator<string> e = t.GetDependees("a").GetEnumerator();
             Assert.IsFalse(e.MoveNext());
 
+            // check that b's dependees are a and c
             e = t.GetDependees("b").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
@@ -363,11 +371,13 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
             Assert.IsTrue(((s1 == "a") && (s2 == "c")) || ((s1 == "c") && (s2 == "a")));
 
+            // check that c's dependee is a
             e = t.GetDependees("c").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             Assert.AreEqual("a", e.Current);
             Assert.IsFalse(e.MoveNext());
 
+            // check that d's dependee is b
             e = t.GetDependees("d").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             Assert.AreEqual("b", e.Current);
@@ -385,10 +395,13 @@ namespace DevelopmentTests
             DependencyGraph t = new DependencyGraph();
             t.AddDependency("a", "b");
             Assert.AreEqual(1, t.Size);
+
+            // replace a's dependents with more than there were to begin with
             HashSet<string> set = new HashSet<String>() { "c", "s" };
             t.ReplaceDependents("a", set);
             Assert.AreEqual(2, t.Size);
 
+            // check that a's dependents are correctly updated
             IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
@@ -397,6 +410,7 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
             Assert.IsTrue(((s1 == "c") && (s2 == "s")) || ((s1 == "s") && (s2 == "c")));
 
+            // check that the dependees were updated accordingly
             Assert.IsTrue(t.GetDependees("c").Contains("a"));
             Assert.IsTrue(t.GetDependees("s").Contains("a"));
         }
@@ -415,13 +429,17 @@ namespace DevelopmentTests
             t.AddDependency("a", "d");
             t.AddDependency("b", "d");
             Assert.AreEqual(4, t.Size);
+
+            // replace a's dependents with nothing
             HashSet<string> set = new HashSet<String>();
             t.ReplaceDependents("a", set);
             Assert.AreEqual(1, t.Size);
 
+            // check that a has no dependents
             IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
             Assert.IsFalse(e.MoveNext());
 
+            // check that the dependees were updated accordingly
             Assert.IsFalse(t.GetDependees("b").Contains("a"));
             Assert.IsFalse(t.GetDependees("z").Contains("a"));
             Assert.IsFalse(t.GetDependees("d").Contains("a"));
@@ -441,6 +459,7 @@ namespace DevelopmentTests
             t.ReplaceDependents("a", set);
             Assert.AreEqual(2, t.Size);
 
+            // check that a was added as a dependee and its dependents are c and s
             IEnumerator<string> e = t.GetDependents("a").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
@@ -449,6 +468,7 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
             Assert.IsTrue(((s1 == "c") && (s2 == "s")) || ((s1 == "s") && (s2 == "c")));
 
+            // check that the dependees were updated accordingly
             Assert.IsTrue(t.GetDependees("c").Contains("a"));
             Assert.IsTrue(t.GetDependees("s").Contains("a"));
         }
@@ -466,16 +486,20 @@ namespace DevelopmentTests
             t.AddDependency("a", "z");
             t.AddDependency("c", "b");
             Assert.AreEqual(3, t.Size);
+
+            // replace b's dependees with less than there were to begin with
             HashSet<string> set = new HashSet<String>() { "p" };
             t.ReplaceDependees("b", set);
             Assert.AreEqual(2, t.Size);
 
+            // check that b's only dependee is now p
             IEnumerator<string> e = t.GetDependees("b").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
             Assert.IsFalse(e.MoveNext());
             Assert.IsTrue(s1 == "p");
 
+            // check that the dependents were updated accordingly
             Assert.IsTrue(t.GetDependents("p").Contains("b"));
         }
 
@@ -493,6 +517,7 @@ namespace DevelopmentTests
             t.ReplaceDependees("a", set);
             Assert.AreEqual(2, t.Size);
 
+            // check that a was added as a dependent and its dependees are c and s
             IEnumerator<string> e = t.GetDependees("a").GetEnumerator();
             Assert.IsTrue(e.MoveNext());
             String s1 = e.Current;
@@ -501,6 +526,7 @@ namespace DevelopmentTests
             Assert.IsFalse(e.MoveNext());
             Assert.IsTrue(((s1 == "c") && (s2 == "s")) || ((s1 == "s") && (s2 == "c")));
 
+            // check that the dependents were updated accordingly
             Assert.IsTrue(t.GetDependents("c").Contains("a"));
             Assert.IsTrue(t.GetDependents("s").Contains("a"));
         }
