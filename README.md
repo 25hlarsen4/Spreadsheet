@@ -24,8 +24,8 @@ between cells to then be able to accurately compute and update formulas in the c
 
 # Time Expenditures:
 
-Assignment 1 - Formula Evaluator:   	Predicted hours: 12  	   Actual hours: 11 
+Assignment 1 - Formula Evaluator:   	Predicted hours: 12  	   Actual hours: 11\
 Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
 
-Assignment 2 - Dependency Graph:		Predicted hours: 13		   Actual hours: 12
+Assignment 2 - Dependency Graph:		Predicted hours: 13		   Actual hours: 12\
 Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
