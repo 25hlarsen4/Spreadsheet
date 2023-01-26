@@ -13,12 +13,19 @@ using System.Text;
 namespace SpreadsheetUtilities
 {
 
-    // DEPENDENTS of t:     What depends on t?
-    // DEPENDEES of t:      What does t depend on?
-
     /// <summary>
-    /// (s1,t1) is an ordered pair of strings
-    /// t1 depends on s1; s1 must be evaluated before t1
+    /// Author:      Hannah Larsen
+    /// Partner:     None
+    /// Date:        20-Jan-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+    /// 
+    /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+    /// All references used in the completion of the assignment are cited in my README file.
+    /// 
+    /// File Contents:
+    /// This file contains a class library that offers an implementation of a dependency graph. 
+    /// This class also offers methods to be performed on said dependency graphs.
     /// 
     /// A DependencyGraph can be modeled as a set of ordered pairs of strings.  Two ordered pairs
     /// (s1,t1) and (s2,t2) are considered equal if and only if s1 equals s2 and t1 equals t2.
@@ -45,9 +52,26 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class DependencyGraph
     {
-
+        /// <summary>
+        /// This dictionary represents the dependents within a DependencyGraph,
+        /// where the keys are nodes and the associated values are HashSets of 
+        /// all dependents of the associate nodes. 
+        /// </summary>
         private Dictionary<string, HashSet<string>> dependents;
+
+
+        /// <summary>
+        /// This dictionary represents the dependees within a DependencyGraph,
+        /// where the keys are nodes and the associated values are HashSets of 
+        /// all dependees of the associate nodes. 
+        /// </summary>
         private Dictionary<string, HashSet<string>> dependees;
+
+
+        /// <summary>
+        /// This variable will keep track of the size of a DependencyGraph, ie.
+        /// the number of ordered pairs in the graph.
+        /// </summary>
         private int size;
 
 
@@ -72,12 +96,14 @@ namespace SpreadsheetUtilities
 
 
         /// <summary>
-        /// The size of dependees(s).
+        /// Return the size of dependees(s).
         /// This property is an example of an indexer.  If dg is a DependencyGraph, you would
         /// invoke it like this:
         /// dg["a"]
-        /// It should return the size of dependees("a")
         /// </summary>
+        /// <param name="s"> s represents the dependent to return the size of the dependees 
+        /// of </param>
+        /// <returns> the number of dependees s has </returns>
         public int this[string s]
         {
             get { if (!dependees.ContainsKey(s)) return 0; else return dependees[s].Count; }
@@ -87,6 +113,9 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Reports whether dependents(s) is non-empty.
         /// </summary>
+        /// <param name="s"> s represents the dependee for which we are determining if it 
+        /// has any dependents </param>
+        /// <returns> true if s has dependents, false otherwise </returns>
         public bool HasDependents(string s)
         {
             if (!dependents.ContainsKey(s))
@@ -101,6 +130,9 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Reports whether dependees(s) is non-empty.
         /// </summary>
+        /// <param name="s"> s represents the dependent for which we are determining if it 
+        /// has any dependees </param>
+        /// <returns> true if s has dependees, false otherwise </returns>
         public bool HasDependees(string s)
         {
             if (!dependees.ContainsKey(s))
@@ -115,6 +147,8 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Enumerates dependents(s).
         /// </summary>
+        /// <param name="s"> s represents the dependee to enumerate the dependents of </param>
+        /// <returns> returns an IEnumerable that can enumerate the dependents of s </returns>
         public IEnumerable<string> GetDependents(string s)
         {
             if (dependents.ContainsKey(s))
@@ -125,9 +159,12 @@ namespace SpreadsheetUtilities
             return new HashSet<string>();
         }
 
+
         /// <summary>
         /// Enumerates dependees(s).
         /// </summary>
+        /// <param name="s"> s represents the dependent to enumerate the dependees of </param>
+        /// <returns> returns an IEnumerable that can enumerate the dependees of s </returns>
         public IEnumerable<string> GetDependees(string s)
         {
             if (dependees.ContainsKey(s))
@@ -140,15 +177,36 @@ namespace SpreadsheetUtilities
 
 
         /// <summary>
-        /// <para>Adds the ordered pair (s,t), if it doesn't exist</para>
-        /// 
-        /// <para>This should be thought of as:</para>   
-        /// 
-        ///   t depends on s
-        ///
+        /// This is a helper method meant to be called in the AddDependency method after
+        /// a change to the dependents dictionary. It will mirror said change in the 
+        /// dependees dictionary accordingly.
         /// </summary>
-        /// <param name="s"> s must be evaluated first. T depends on S</param>
-        /// <param name="t"> t cannot be evaluated until s is</param>        /// 
+        /// <param name="t"> t represents the dependent to add a dependee to </param>
+        /// <param name="s"> s represents the dependee to be added </param>
+        private void MirrorChange(string t, string s)
+        {
+            // check if we have to make a new entry for t in the dependees dictionary, 
+            // or if we just have to add s to t's already existing list of dependees
+            if (!dependees.ContainsKey(t))
+            {
+                dependees.Add(t, new HashSet<string>());
+                dependees[t].Add(s);
+            }
+
+            // we now know that t is in the dependees dictionary, but we must add s to its
+            // list of dependees
+            else
+            {
+                dependees[t].Add(s);
+            }
+        }
+
+
+        /// <summary>
+        /// Adds the ordered pair (s,t), if it doesn't exist
+        /// </summary>
+        /// <param name="s"> s represents the dependee, s must be evaluated first </param>
+        /// <param name="t"> t represents the dependent, t cannot be evaluated until s is </param>
         public void AddDependency(string s, string t)
         {
 
@@ -160,21 +218,8 @@ namespace SpreadsheetUtilities
                 dependents[s].Add(t);
                 size++;
 
-                // now check if we have to make a new entry for t in the dependees dictionary, 
-                // or if we just have to add s to t's already existing list of dependees
-                if (!dependees.ContainsKey(t))
-                {
-                    dependees.Add(t, new HashSet<string>());
-                    dependees[t].Add(s);
-                }
-
-                // we now know that t is in the dependees dictionary, but we must add s to its
-                // list of dependees
-                else
-                {
-                    HashSet<string> dependeeList = dependees[t];
-                    dependeeList.Add(s);
-                }
+                // mirror the change in the dependees dictionary as well
+                MirrorChange(t, s);
             }
 
             // if s is already in the dependents dictionary
@@ -182,71 +227,37 @@ namespace SpreadsheetUtilities
             {
                 HashSet<string> dependentList = dependents[s];
 
-                // first make sure that the dependency doesn't already exist
+                // make sure that the dependency doesn't already exist
                 if (!dependentList.Contains(t))
                 {
                     dependentList.Add(t);
                     size++;
 
-                    if (!dependees.ContainsKey(t))
-                    {
-                        dependees.Add(t, new HashSet<string>());
-                        dependees[t].Add(s);
-                    }
-
-                    else
-                    {
-                        HashSet<string> dependeeList = dependees[t];
-                        dependeeList.Add(s);
-                    }
+                    // mirror the change in the dependees dictionary as well
+                    MirrorChange(t, s);
                 }
             }
-
-            //if (!dependees.ContainsKey(t))
-            //{
-            //    dependees.Add(t, new LinkedList<string>());
-            //    dependees[t].AddFirst(s);
-            //}
-
-            //else
-            //{
-            //    LinkedList<string> dependeeList = dependees[t];
-            //    if (!dependeeList.Contains(s))
-            //    {
-            //        dependeeList.AddLast(s);
-            //    }
-            //}
         }
 
 
         /// <summary>
         /// Removes the ordered pair (s,t), if it exists
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="t"></param>
+        /// <param name="s"> s represents the dependee </param>
+        /// <param name="t"> t represents the dependent </param>
         public void RemoveDependency(string s, string t)
         {
+            // first check if s is already in the dependents dictionary
             if (dependents.ContainsKey(s))
             {
+                // then if the dependents removal is successful, decrement the size
+                // and mirror the change in the dependees dictionary
                 if (dependents[s].Remove(t))
                 {
                     size--;
                     dependees[t].Remove(s);
                 }
             }
-
-            //LinkedList<string> dependentValue = dependents[s];
-            //if (dependentValue.Contains(t))
-            //{
-            //    dependentValue.Remove(t);
-            //    size--;
-            //}
-
-            //LinkedList<string> dependeeValue = dependees[t];
-            //if (dependeeValue.Contains(s))
-            //{
-            //    dependeeValue.Remove(s);
-            //}
         }
 
 
@@ -254,24 +265,31 @@ namespace SpreadsheetUtilities
         /// Removes all existing ordered pairs of the form (s,r). Then, for each
         /// t in newDependents, adds the ordered pair (s,t).
         /// </summary>
+        /// <param name="s"> s represents the dependee to replace all dependents of </param>
+        /// <param name="newDependents"> newDependents represents the list of new dependents
+        /// to replace s's old dependents with </param>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
-        {
+        { 
             if (dependents.ContainsKey(s))
             {
+                // mirror the future change of clearing the dependents of s by updating
+                // the dependees dictionary accordingly
                 foreach (string oldDependent in dependents[s])
                 {
                     dependees[oldDependent].Remove(s);
                     size--;
                 }
-                //dependents[s].Clear();
+                
                 dependents[s] = new HashSet<string>();
             }
 
+            // create an entry for s in dependents since it doesn't already exist
             else
             {
                 dependents.Add(s, new HashSet<string>());
             }
 
+            // add each new dependent and mirror the changes in dependees as well
             foreach (string newDependent in newDependents)
             {
                 dependents[s].Add(newDependent);
@@ -290,24 +308,31 @@ namespace SpreadsheetUtilities
         /// Removes all existing ordered pairs of the form (r,s).  Then, for each 
         /// t in newDependees, adds the ordered pair (t,s).
         /// </summary>
+        /// <param name="s"> s represents the dependent to replace all dependees of </param>
+        /// <param name="newDependees"> newDependees represents the list of new dependees
+        /// to replace s's old dependees with </param>
         public void ReplaceDependees(string s, IEnumerable<string> newDependees)
         {
             if (dependees.ContainsKey(s))
             {
+                // mirror the future change of clearing the dependees of s by updating
+                // the dependents dictionary accordingly
                 foreach (string oldDependee in dependees[s])
                 {
                     dependents[oldDependee].Remove(s);
                     size--;
                 }
-                //dependees[s].Clear();
+                
                 dependees[s] = new HashSet<string>();
             }
 
+            // create an entry for s in dependees since it doesn't already exist
             else
             {
                 dependees.Add(s, new HashSet<string>());
             }
 
+            // add each new dependee and mirror the changes in dependents as well
             foreach (string newDependee in newDependees)
             {
                 dependees[s].Add(newDependee);
@@ -318,10 +343,7 @@ namespace SpreadsheetUtilities
                     dependents.Add(newDependee, new HashSet<string>());
                 }
                 dependents[newDependee].Add(s);
-                
             }
         }
-
     }
-
 }
