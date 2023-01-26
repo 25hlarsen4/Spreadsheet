@@ -124,7 +124,7 @@ namespace SpreadsheetUtilities
         {
             if (dependents.ContainsKey(s))
             {
-                return dependents[s];
+                return new HashSet<string>(dependents[s]);
             }
 
             return new HashSet<string>();
@@ -140,7 +140,7 @@ namespace SpreadsheetUtilities
         {
             if (dependees.ContainsKey(s))
             {
-                return dependees[s];
+                return new HashSet<string>(dependees[s]);
             }
 
             return new HashSet<string>();
