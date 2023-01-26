@@ -8,10 +8,19 @@ using SpreadsheetUtilities;
 namespace DevelopmentTests
 {
     /// <summary>
-    ///This is a test class for DependencyGraphTest and is intended
-    ///to contain all DependencyGraphTest Unit Tests
-    ///</summary>
-    /// ********************************8 ASK ABOUT THE NAME OF THIS CLASS PLS DONT FORGET *********************************
+    /// Author:      Hannah Larsen
+    /// Partner:     None
+    /// Date:        20-Jan-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+    /// 
+    /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+    /// All references used in the completion of the assignment are cited in my README file.
+    /// 
+    /// File Contents:
+    /// This file contains a test class for DependencyGraphTest and is intended to contain all DependencyGraphTest Unit Tests.
+    /// It tests all methods in the DependencyGraph class.
+    /// </summary>
     [TestClass()]
     public class DependencyGraphTest
     {
@@ -164,6 +173,23 @@ namespace DevelopmentTests
 
 
         /// <summary>
+        /// This tests that you can add a cycle without error.
+        /// </summary>
+        [TestMethod()]
+        public void AddDependencyCycleTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            Assert.AreEqual(0, t.Size);
+            t.AddDependency("a", "a");
+            Assert.AreEqual(1, t.Size);
+
+            // check that the dependents and dependees were updated accordingly
+            Assert.IsTrue(t.GetDependents("a").Contains("a"));
+            Assert.IsTrue(t.GetDependees("a").Contains("a"));
+        }
+
+
+        /// <summary>
         /// This tests that you cannot add duplicate dependencies.
         /// </summary>
         [TestMethod()]
@@ -216,6 +242,21 @@ namespace DevelopmentTests
             Assert.AreEqual(2, t.Size);
             t.RemoveDependency("a", "b");
             Assert.AreEqual(1, t.Size);
+        }
+
+
+        /// <summary>
+        /// This tests that you can remove a cycle dependency
+        /// without error.
+        /// </summary>
+        [TestMethod()]
+        public void RemoveDependencyCycleTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "a");
+            Assert.AreEqual(1, t.Size);
+            t.RemoveDependency("a", "a");
+            Assert.AreEqual(0, t.Size);
         }
 
 

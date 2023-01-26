@@ -17,8 +17,15 @@ The Spreadsheet program is currently capable of evaluating valid mathematical ex
 and the only operators allowed are +, -, *, /, (, and ).
 Variables are also allowed (of the form of one or more upper or lower case letters followed by one or more digits), 
 and their values are looked up using a delegate. 
-Future extensions are still unclear, but the eventual goal is to have a spreadsheet with this evaluating ability built in.
+Furthermore, the Spreadsheet program has the capability to make dependency graphs to represent the dependencies between 
+cells in a spreadsheet.
+Future extensions are still unclear, but the eventual goal is to have a spreadsheet that can keep track of dependencies
+between cells to then be able to accurately compute and update formulas in the cells.
 
 # Time Expenditures:
 
-Assignment 1:   	Predicted hours: 12  	   Actual hours: 11
+Assignment 1 - Formula Evaluator:   	Predicted hours: 12  	   Actual hours: 11 
+Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
+
+Assignment 2 - Dependency Graph:		Predicted hours: 13		   Actual hours: 12
+Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
