@@ -4,7 +4,7 @@ Partner:		None
 Course:			CS3500, University of Utah, School of Computing
 GitHub ID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-Date:			
+Date:			25-Jan-2023 11:30 PM
 Project:	  	DependencyGraphTests
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```

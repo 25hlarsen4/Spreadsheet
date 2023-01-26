@@ -4,15 +4,8 @@
 //               (Clarified meaning of dependent and dependee.)
 //               (Clarified names in solution/project structure.)
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace SpreadsheetUtilities
 {
-
     /// <summary>
     /// Author:      Hannah Larsen
     /// Partner:     None
@@ -24,31 +17,9 @@ namespace SpreadsheetUtilities
     /// All references used in the completion of the assignment are cited in my README file.
     /// 
     /// File Contents:
-    /// This file contains a class library that offers an implementation of a dependency graph. 
-    /// This class also offers methods to be performed on said dependency graphs.
-    /// 
-    /// A DependencyGraph can be modeled as a set of ordered pairs of strings.  Two ordered pairs
-    /// (s1,t1) and (s2,t2) are considered equal if and only if s1 equals s2 and t1 equals t2.
-    /// Recall that sets never contain duplicates.  If an attempt is made to add an element to a 
-    /// set, and the element is already in the set, the set remains unchanged.
-    /// 
-    /// Given a DependencyGraph DG:
-    /// 
-    ///    (1) If s is a string, the set of all strings t such that (s,t) is in DG is called dependents(s).
-    ///        (The set of things that depend on s)
-    ///        
-    ///    (2) If s is a string, the set of all strings t such that (t,s) is in DG is called dependees(s).
-    ///        (The set of things that s depends on)
-    //
-    // For example, suppose DG = {("a", "b"), ("a", "c"), ("b", "d"), ("d", "d")}
-    //     dependents("a") = {"b", "c"}
-    //     dependents("b") = {"d"}
-    //     dependents("c") = {}
-    //     dependents("d") = {"d"}
-    //     dependees("a") = {}
-    //     dependees("b") = {"a"}
-    //     dependees("c") = {"a"}
-    //     dependees("d") = {"b", "d"}
+    /// This file contains a class library that offers an implementation of a dependency graph in which it is modeled
+    /// as a set of ordered pairs of strings such that the first entry is the dependee and the second entry is the 
+    /// dependent. This class also offers methods to be performed on said dependency graphs.
     /// </summary>
     public class DependencyGraph
     {

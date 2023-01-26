@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SpreadsheetUtilities;
-
 
 namespace DevelopmentTests
 {
@@ -24,7 +19,6 @@ namespace DevelopmentTests
     [TestClass()]
     public class DependencyGraphTest
     {
-
         /// <summary>
         /// This tests the indexer method in a basic case.
         /// </summary>
@@ -141,6 +135,76 @@ namespace DevelopmentTests
             t.AddDependency("c", "d");
             t.AddDependency("d", "b");
             Assert.IsFalse(t.HasDependents("p"));
+        }
+
+
+        /// <summary>
+        /// This tests the GetDependents method in a simple case.
+        /// </summary>
+        [TestMethod()]
+        public void GetDependentsTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("c", "b");
+
+            IEnumerable<string> e = t.GetDependents("c");
+            Assert.IsTrue(e.Contains("d"));
+            Assert.IsTrue(e.Contains("b"));
+            Assert.AreEqual(2, e.Count());
+        }
+
+
+        /// <summary>
+        /// This tests the GetDependents method in the case that
+        /// there are none.
+        /// </summary>
+        [TestMethod()]
+        public void GetNoDependentsTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("c", "b");
+
+            IEnumerator<string> e = t.GetDependents("b").GetEnumerator();
+            Assert.IsFalse(e.MoveNext());
+        }
+
+
+        /// <summary>
+        /// This tests the GetDependees method in a simple case.
+        /// </summary>
+        [TestMethod()]
+        public void GetDependeesTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("c", "b");
+
+            IEnumerable<string> e = t.GetDependees("b");
+            Assert.IsTrue(e.Contains("a"));
+            Assert.IsTrue(e.Contains("c"));
+            Assert.AreEqual(2, e.Count());
+        }
+
+
+        /// <summary>
+        /// This tests the GetDependees method in the case that
+        /// there are none.
+        /// </summary>
+        [TestMethod()]
+        public void GetNoDependeesTest()
+        {
+            DependencyGraph t = new DependencyGraph();
+            t.AddDependency("a", "b");
+            t.AddDependency("c", "d");
+            t.AddDependency("c", "b");
+
+            IEnumerator<string> e = t.GetDependees("c").GetEnumerator();
+            Assert.IsFalse(e.MoveNext());
         }
 
 
