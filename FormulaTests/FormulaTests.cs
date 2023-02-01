@@ -2,16 +2,272 @@ using SpreadsheetUtilities;
 
 namespace FormulaTests
 {
+    /// <summary>
+    /// Author:      Hannah Larsen
+    /// Partner:     None
+    /// Date:        20-Jan-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+    /// 
+    /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+    /// All references used in the completion of the assignment are cited in my README file.
+    /// 
+    /// File Contents:
+    /// This file contains a test class for Formula and is intended to contain all FormulaTests Unit Tests.
+    /// It tests all methods in the Formula class.
+    /// </summary>
     [TestClass]
     public class FormulaTests
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
 
+        //[TestInitialize]
+        //public void TestInitialize()
+        //{
+
+        //}
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula has no tokens.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula()
+        {
+            Action a = () => new Formula("");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
         }
 
 
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula has more closing parenthesis than opening ones.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula2()
+        {
+            Action a = () => new Formula("2+(3-4))");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This also tests that the formula constructor throws a FormulaFormatException when
+        /// the formula has more closing parenthesis than opening ones, and is here for the sake
+        /// of code coverage.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula10()
+        {
+            Action a = () => new Formula("(3 + 2)) - a2");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        ///// <summary>
+        ///// This tests that the formula constructor throws a FormulaFormatException when
+        ///// the formula includes a negative number.
+        ///// </summary>
+        //[TestMethod]
+        //public void TestSyntacticallyIncorrectFormula3()
+        //{
+        //    Action a = () => new Formula("-2");
+        //    Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        //}
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula includes a negative number.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula4()
+        {
+            Action a = () => new Formula("3 + (-4)");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// a ) is not followed by an operator or )
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula5()
+        {
+            Action a = () => new Formula("3 + 2)(");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula does not end in a ), number, or variable.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula6()
+        {
+            Action a = () => new Formula("3 * 2 -");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula does not start with a (, number, or variable.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula11()
+        {
+            Action a = () => new Formula("+ 3 * 2");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula includes an invalid variable as determined by the passed in validator.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula7()
+        {
+            Action a = () => new Formula("3 * 2 - a2", s => s, s => false);
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This also tests that the formula constructor throws a FormulaFormatException when
+        /// the formula includes an invalid variable as determined by the passed in validator, and
+        /// is here for the sake of code coverage.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula8()
+        {
+            Action a = () => new Formula("a2 * 2", s => s, s => false);
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// a number is not followed by an operator or ).
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormula9()
+        {
+            Action a = () => new Formula("3 * 2 3");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        ///// <summary>
+        ///// This tests that the formula constructor throws a FormulaFormatException when
+        ///// a number is not followed by an operator or ).
+        ///// </summary>
+        //[TestMethod]
+        //public void TestSyntacticallyIncorrectFormulaInvalidVariable()
+        //{
+        //    Action a = () => new Formula("(3 + 2) - a2", s => s, s => false);
+        //    Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        //}
+
+
+        /// <summary>
+        /// This tests that an explicit division by zero returns a FormulaError.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateExplicitDivisionByZero()
+        {
+            Formula form = new Formula("2.02/0");
+            Assert.AreEqual(form.Evaluate(null), new FormulaError("A division by zero occurred."));
+        }
+
+
+        /// <summary>
+        /// This tests that an implicit division by zero returns a FormulaError.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateImplicitDivisionByZero()
+        {
+            Formula form = new Formula("2 / (4-4)");
+            Assert.AreEqual(form.Evaluate(null), new FormulaError("A division by zero occurred."));
+        }
+
+
+        /// <summary>
+        /// This tests that a complicated expression using a mixture of operations can 
+        /// be correctly evaluated.
+        /// </summary>
+        [TestMethod]
+        public void TestComplicatedEvaluate()
+        {
+            Formula form = new Formula("2+3*5+(3+4*8)*5+2");
+            Assert.AreEqual(form.Evaluate(null), Convert.ToDouble(194));
+        }
+
+
+        /// <summary>
+        /// This tests that a negative result can correctly be achieved by the evaulate method.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateNegativeResult()
+        {
+            Formula form = new Formula("( 5-10 )/2");
+            Assert.AreEqual(form.Evaluate(null), -2.5);
+        }
+
+
+        /// <summary>
+        /// This tests that the evaluate method can correctly handle scientific notation.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateScientificNotation()
+        {
+            Formula form = new Formula("5e-5/10");
+            Assert.AreEqual(form.Evaluate(null), 5e-6);
+        }
+
+
+        /// <summary>
+        /// This tests that the evaluate method returns a ForumlaError when a variable
+        /// does not have a value when looked up by the lookup delegate.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateUndefinedVariable()
+        {
+            Formula form = new Formula("3 * t2");
+            Assert.AreEqual(form.Evaluate((s) => throw new ArgumentException()), new FormulaError("An undefined variable was encountered."));
+        }
+
+
+        /// <summary>
+        /// This tests that the evaluate method returns a ForumlaError when a variable
+        /// is encountered but no lookup delegate is provided.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateUndefinedVariable2()
+        {
+            Formula form = new Formula("3 * t2");
+            Assert.AreEqual(form.Evaluate(null), new FormulaError("A variable was encountered but no lookup delegate was provided."));
+        }
+
+
+        /// <summary>
+        /// This tests that the evaluate method can correctly look up a variable's
+        /// value via the lookup delegate.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateDefinedVariable()
+        {
+            Formula form = new Formula("3 * t2");
+            Assert.AreEqual(form.Evaluate((s) => 5), Convert.ToDouble(15));
+        }
+
+
+        /// <summary>
+        /// This tests the GetVariables method in a simple case where the identity
+        /// normalizer is used.
+        /// </summary>
         [TestMethod]
         public void TestGetVariablesIdentityNormalizer()
         {
@@ -24,6 +280,9 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the GetVariables method does not return duplicate variables.
+        /// </summary>
         [TestMethod]
         public void TestGetVariablesWithDuplicateVariables()
         {
@@ -36,6 +295,10 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the ToString method in a simple case where the identity
+        /// normalizer is used.
+        /// </summary>
         [TestMethod]
         public void TestToStringIdentityNormalizer()
         {
@@ -44,20 +307,34 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the ToString method in a case where both doubles and variables
+        /// are included in the formula
+        /// </summary>
         [TestMethod]
         public void TestToStringNumsAndVariables()
         {
             Formula form = new Formula("(2.00 - x) + Y");
-            Assert.AreEqual("(2.00-x)+Y", form.ToString());
+            Assert.AreEqual("(2-x)+Y", form.ToString());
         }
 
 
+        /// <summary>
+        /// This tests the ToString method in a case where the normalizer turns
+        /// all variables to upper case.
+        /// </summary>
         [TestMethod]
         public void TestToStringInputNormalizer()
         {
+            Formula form = new Formula("(2.020 -  t) / d4", s => s.ToUpper(), s => true);
+            Assert.AreEqual("(2.02-T)/D4", form.ToString());
         }
 
 
+        /// <summary>
+        /// This tests the Equals method in a case where two doubles are equal
+        /// but have a different number of zeros on the end.
+        /// </summary>
         [TestMethod]
         public void TestEqualsTrue()
         {
@@ -67,6 +344,10 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the Equals method in a case where a difference in variable
+        /// capitalization determines that 2 formulas are not equal.
+        /// </summary>
         [TestMethod]
         public void TestEqualsFalse()
         {
@@ -76,6 +357,92 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the Equals method in a case where the passed in variable 
+        /// normalizer makes it so 2 formulas are equal, otherwise they would not be.
+        /// </summary>
+        [TestMethod]
+        public void TestEqualsNormalizerMakesTheDifference()
+        {
+            Formula form1 = new Formula("(2.00 - x) + Y", s => s.ToUpper(), s => true);
+            Formula form2 = new Formula("(2.00 - X) + Y");
+            Assert.IsTrue(form1.Equals(form2));
+        }
+
+
+        //[TestMethod]
+        //public void TestEqualsDifferentNumberOfTokens()
+        //{
+        //    Formula form1 = new Formula("(2.00 - X) + Y");
+        //    Formula form2 = new Formula("(2.00 - X) + Y -2");
+        //    Assert.IsFalse(form1.Equals(form2));
+        //}
+
+
+        //[TestMethod]
+        //public void TestEqualsDifferentNumbers()
+        //{
+        //    Formula form1 = new Formula("(2.00 - X) + Y");
+        //    Formula form2 = new Formula("(2.01 - X) + Y");
+        //    Assert.IsFalse(form1.Equals(form2));
+        //}
+
+
+        //[TestMethod]
+        //public void TestEqualsNumberVsVariable()
+        //{
+        //    Formula form1 = new Formula("(2.00 - X)");
+        //    Formula form2 = new Formula("(x - X)");
+        //    Assert.IsFalse(form1.Equals(form2));
+        //}
+
+
+        //[TestMethod]
+        //public void TestEqualsVariableVsNumber()
+        //{
+        //    Formula form1 = new Formula("(y2 - X)");
+        //    Formula form2 = new Formula("(3.5 - X)");
+        //    Assert.IsFalse(form1.Equals(form2));
+        //}
+
+
+        //[TestMethod]
+        //public void TestEqualsDifferentOperators()
+        //{
+        //    Formula form1 = new Formula("(3.5 - X)");
+        //    Formula form2 = new Formula("(3.5 + X)");
+        //    Assert.IsFalse(form1.Equals(form2));
+        //}
+
+
+        /// <summary>
+        /// This tests the Equals method in a case where the passed in object is
+        /// not of the Formula type.
+        /// </summary>
+        [TestMethod]
+        public void TestEqualsObjNotFormula()
+        {
+            Formula form1 = new Formula("(2.00 - x) + Y");
+            string obj = "hi";
+            Assert.IsFalse(form1.Equals(obj));
+        }
+
+
+        /// <summary>
+        /// This tests the Equals method in the case where the passed in object is null.
+        /// </summary>
+        [TestMethod]
+        public void TestEqualsNullObj()
+        {
+            Formula form1 = new Formula("(2.00 - x) + Y");
+            Formula obj = null;
+            Assert.IsFalse(form1.Equals(obj));
+        }
+
+
+        /// <summary>
+        /// This tests the == method in the case where the result is true.
+        /// </summary>
         [TestMethod]
         public void TestOperatorEqualsTrue()
         {
@@ -85,6 +452,9 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the == method in the case where the result is false.
+        /// </summary>
         [TestMethod]
         public void TestOperatorEqualsFalse()
         {
@@ -94,6 +464,9 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the != method in the case where the result is true.
+        /// </summary>
         [TestMethod]
         public void TestOperatorNotEqualsTrue()
         {
@@ -103,6 +476,9 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests the != method in the case where the result is false.
+        /// </summary>
         [TestMethod]
         public void TestOperatorNotEqualsFalse()
         {
@@ -112,6 +488,10 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests that the GetHashCode method returns the same hash code
+        /// when called on two equal formulas as defined by the equals method.
+        /// </summary>
         [TestMethod]
         public void TestGetHashCodeOnTwoEqualFormulas()
         {
@@ -123,6 +503,12 @@ namespace FormulaTests
         }
 
 
+        /// <summary>
+        /// This tests that the GetHashCode method returns different hash codes
+        /// when called on two unequal formulas as defined by the equals method
+        /// (note that this result is not guaranteed for all unequal formulas, but 
+        /// should be the case in almost all cases).
+        /// </summary>
         [TestMethod]
         public void TestGetHashCodeOnTwoUnequalFormulas()
         {

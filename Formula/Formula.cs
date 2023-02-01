@@ -27,13 +27,22 @@ using System.Text.RegularExpressions;
 namespace SpreadsheetUtilities
 {
     /// <summary>
-    /// Represents formulas written in standard infix notation using standard precedence
+    /// Author:      Hannah Larsen
+    /// Partner:     None
+    /// Date:        20-Jan-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+    /// 
+    /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+    /// All references used in the completion of the assignment are cited in my README file.
+    /// 
+    /// File Contents:
+    /// This file contains a class library that represents formulas written in standard infix notation using standard precedence
     /// rules.  The allowed symbols are non-negative numbers written using double-precision 
     /// floating-point syntax (without unary preceeding '-' or '+'); 
     /// variables that consist of a letter or underscore followed by 
     /// zero or more letters, underscores, or digits; parentheses; and the four operator 
-    /// symbols +, -, *, and /.  
-    /// 
+    /// symbols +, -, *, and /. 
     /// Spaces are significant only insofar that they delimit tokens.  For example, "xy" is
     /// a single variable, "x y" consists of two variables "x" and y; "x23" is a single variable; 
     /// and "x 23" consists of a variable "x" and a number "23".
@@ -46,13 +55,30 @@ namespace SpreadsheetUtilities
     /// </summary>
     public class Formula
     {
+        /// <summary>
+        /// This IEnumerable holds all tokens of a Formula.
+        /// </summary>
         private IEnumerable<string> tokens;
 
+        /// <summary>
+        /// This func is a normalizer that is used to convert variables into a canonical form.
+        /// </summary>
         Func<string, string> normalizer;
 
+        /// <summary>
+        /// This func is a validator that is used to add extra restrictions on the validity of a variable (beyond the standard requirement 
+        /// that it consists of a letter or underscore followed by zero or more letters, underscores,
+        /// or digits.)
+        /// </summary>
         Func<string, bool> validator;
 
         // "^[a-zA-Z_]{1}[a-zA-Z_]*$"
+        /// <summary>
+        /// This is a helper method to be called in the Formula constructors that will throw 
+        /// a FormulaFormatException if this Formula is syntactically incorrect.
+        /// </summary>
+        /// <exception cref="FormulaFormatException"> Throws a FormulaFormatException if this 
+        /// Formula is syntactically incorrect. </exception>
         private void DetermineIfSyntacticallyIncorrect()
         {
             IEnumerator<string> formTokens = tokens.GetEnumerator();
@@ -162,6 +188,13 @@ namespace SpreadsheetUtilities
         }
 
 
+        /// <summary>
+        /// This is a helper method that determines if the input string is a 
+        /// variable by determining if it matches the variable regular expression.
+        /// </summary>
+        /// <param name="token"> The string to see if is a variable. </param>
+        /// <returns> Returns true if the input string is a variable, and false
+        /// otherwise. </returns>
         private static Boolean isVariable(String token)
         {
             if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
@@ -397,7 +430,7 @@ namespace SpreadsheetUtilities
                     // do i need to check for this????
                     if (lookup == null)
                     {
-                        // error
+                        return new FormulaError("A variable was encountered but no lookup delegate was provided.");
                     }
 
                     try
