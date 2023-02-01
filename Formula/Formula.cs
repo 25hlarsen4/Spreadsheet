@@ -68,7 +68,7 @@ namespace SpreadsheetUtilities
             //tokens.MoveNext();       **** I dont think you need this bc the if statement already called it?? *****
             string prevToken = formTokens.Current;
 
-            // do i use the validator in here???
+            // the first token must be a (, number, or variable
             if ((prevToken != "(") && !Double.TryParse(prevToken, out double result) && !isVariable(prevToken))
             {
                 throw new FormulaFormatException("Formulas must start with either a number, a variable, or a (. Make sure that the formula starts with one of these things.");
@@ -238,7 +238,7 @@ namespace SpreadsheetUtilities
             }
             else
             {
-                // make sure division by zero does not occur ****(CHECK THAT 0.00 == 0.0)
+                // are we supposed to be doing float div???
                 if (operand2 == 0.0)
                 {
                     throw new ArgumentException();
@@ -466,7 +466,7 @@ namespace SpreadsheetUtilities
 
             foreach (string token in tokens)
             {
-                if (Regex.IsMatch(token, "^[a-zA-Z_]{1}[a-zA-Z_]*$") && validator(token))
+                if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*") && validator(token))
                 {
                     string normalized = normalizer(token);
                     if (!variables.Contains(normalized))
@@ -498,11 +498,18 @@ namespace SpreadsheetUtilities
                 // do i need to worry about variables being valid???
 
                 // if token is a variable, normalize it
-                if (Regex.IsMatch(token, "^[a-zA-Z_]{1}[a-zA-Z_]*$"))
+                if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
                 {
                     formulaString += normalizer(token);
                 }
 
+                // if it's a number, get it to normalized format
+                else if (Double.TryParse(token, out double result))
+                {
+                    formulaString += result.ToString();
+                }
+
+                // otherwise it's just an operator
                 else
                 {
                     formulaString += token;
@@ -541,57 +548,73 @@ namespace SpreadsheetUtilities
                 return false;
             }
 
-            //Formula? form = obj as Formula;
-            Formula? form = (Formula)obj;
-            //Formula form = (Formula)obj;
+            //formula? form = obj as formula;
+            //Formula? form = (Formula)obj;
+            //formula form = (formula)obj;
 
-            // if each formula has a different number of tokens, we know they're not equal
-            if (this.tokens.Count() != form.tokens.Count())
+            else if (this.ToString() == obj.ToString())
+            {
+                return true;
+            }
+
+            else
             {
                 return false;
             }
 
-            // not we know they have the same number of tokens
-            List<string> tokens1 = this.tokens.ToList();
-            List<string> tokens2 = form.tokens.ToList();
+            //// if each formula has a different number of tokens, we know they're not equal
+            //if (this.tokens.Count() != form.tokens.Count())
+            //{
+            //    return false;
+            //}
 
-            for (int i = 0; i < tokens1.Count(); i++)
-            {
-                if (Double.TryParse(tokens1[i], out double result))
-                {
-                    if (!Double.TryParse(tokens2[i], out double result2))
-                    {
-                        return false;
-                    }
+            //// now we know they have the same number of tokens
+            //// convert the tokens into lists so they can be indexable
+            //List<string> tokens1 = this.tokens.ToList();
+            //List<string> tokens2 = form.tokens.ToList();
 
-                    // now we know both tokens are numbers
-                    else if (result.ToString() != result2.ToString())
-                    {
-                        return false;
-                    }
-                }
+            //for (int i = 0; i < tokens1.Count(); i++)
+            //{
+            //    // all i need to do?
 
-                else if (Regex.IsMatch(tokens1[i], "^[a-zA-Z_]{1}[a-zA-Z_]*$"))
-                {
-                    if (!Regex.IsMatch(tokens2[i], "^[a-zA-Z_]{1}[a-zA-Z_]*$"))
-                    {
-                        return false;
-                    }
+            //    // if the token is a number
+            //    if (double.TryParse(tokens1[i], out double result))
+            //    {
+            //        if (!double.TryParse(tokens2[i], out double result2))
+            //        {
+            //            return false;
+            //        }
 
-                    // now we know both tokens are variables
-                    else if (this.normalizer(tokens1[i]) != form.normalizer(tokens2[i]))
-                    {
-                        return false;
-                    }
-                }
+            //        // now we know both tokens are numbers
+            //        else if (result.ToString() != result2.ToString())
+            //        {
+            //            return false;
+            //        }
+            //    }
 
-                else if (tokens1[i] != tokens2[i])
-                {
-                    return false;
-                }
-            }
+            //    // if the token is a variable
+            //    else if (Regex.IsMatch(tokens1[i], @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            //    {
+            //        if (!Regex.IsMatch(tokens2[i], @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            //        {
+            //            return false;
+            //        }
 
-            return true;
+            //        // now we know both tokens are variables
+            //        else if (this.normalizer(tokens1[i]) != form.normalizer(tokens2[i]))
+            //        {
+            //            return false;
+            //        }
+            //    }
+
+            //    // otherwise the token is just an operator
+            //    else if (tokens1[i] != tokens2[i])
+            //    {
+            //        return false;
+            //    }
+            //}
+
+            //return true;
         }
 
         /// <summary>
@@ -630,7 +653,7 @@ namespace SpreadsheetUtilities
                     code += result.ToString().GetHashCode();
                 }
 
-                else if (Regex.IsMatch(e.Current, "^[a-zA-Z_]{1}[a-zA-Z_]*$"))
+                else if (Regex.IsMatch(e.Current, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
                 {
                     code += this.normalizer(e.Current).GetHashCode();
                 }
