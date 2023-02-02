@@ -5,7 +5,7 @@ namespace FormulaTests
     /// <summary>
     /// Author:      Hannah Larsen
     /// Partner:     None
-    /// Date:        20-Jan-2023
+    /// Date:        27-Jan-2023
     /// Course:      CS3500, University of Utah, School of Computing
     /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
     /// 
@@ -165,6 +165,18 @@ namespace FormulaTests
 
 
         /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// the formula includes an invalid variable as determined by the passed in validator.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormulaIllegalVariable()
+        {
+            Action a = () => new Formula("3.5 * 2a + 4.5");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
         /// This also tests that the formula constructor throws a FormulaFormatException when
         /// the formula includes an invalid variable as determined by the passed in validator, and
         /// is here for the sake of code coverage.
@@ -226,7 +238,10 @@ namespace FormulaTests
             Formula f = new Formula("((3+5+(2*2)*(3*3)) /2) *3");
             Formula g = new Formula("(((3 - 4) - 2) * 5) / 2");
             Formula h = new Formula("(2+ 5) /  1.5 * (4-1)");
+
+            // test cases with variables
             Formula k = new Formula("2 + (_a1 - (2.5 / _a1))");
+            Formula l = new Formula("___*(x2_+(r_3*(t+(_*_3))))");
 
             Assert.AreEqual(Convert.ToDouble(3), a.Evaluate(null));
             Assert.AreEqual(Convert.ToDouble(5), b.Evaluate(null));
@@ -237,6 +252,7 @@ namespace FormulaTests
             Assert.AreEqual(-7.5, g.Evaluate(null));
             Assert.AreEqual(Convert.ToDouble(14), h.Evaluate(null));
             Assert.AreEqual(2.75, k.Evaluate(s => 2));
+            Assert.AreEqual(Convert.ToDouble(3), l.Evaluate(s => 1));
         }
 
 
@@ -427,51 +443,6 @@ namespace FormulaTests
             Formula form2 = new Formula("(2.00 - X) + Y");
             Assert.IsTrue(form1.Equals(form2));
         }
-
-
-        //[TestMethod]
-        //public void TestEqualsDifferentNumberOfTokens()
-        //{
-        //    Formula form1 = new Formula("(2.00 - X) + Y");
-        //    Formula form2 = new Formula("(2.00 - X) + Y -2");
-        //    Assert.IsFalse(form1.Equals(form2));
-        //}
-
-
-        //[TestMethod]
-        //public void TestEqualsDifferentNumbers()
-        //{
-        //    Formula form1 = new Formula("(2.00 - X) + Y");
-        //    Formula form2 = new Formula("(2.01 - X) + Y");
-        //    Assert.IsFalse(form1.Equals(form2));
-        //}
-
-
-        //[TestMethod]
-        //public void TestEqualsNumberVsVariable()
-        //{
-        //    Formula form1 = new Formula("(2.00 - X)");
-        //    Formula form2 = new Formula("(x - X)");
-        //    Assert.IsFalse(form1.Equals(form2));
-        //}
-
-
-        //[TestMethod]
-        //public void TestEqualsVariableVsNumber()
-        //{
-        //    Formula form1 = new Formula("(y2 - X)");
-        //    Formula form2 = new Formula("(3.5 - X)");
-        //    Assert.IsFalse(form1.Equals(form2));
-        //}
-
-
-        //[TestMethod]
-        //public void TestEqualsDifferentOperators()
-        //{
-        //    Formula form1 = new Formula("(3.5 - X)");
-        //    Formula form2 = new Formula("(3.5 + X)");
-        //    Assert.IsFalse(form1.Equals(form2));
-        //}
 
 
         /// <summary>

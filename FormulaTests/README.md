@@ -4,8 +4,8 @@ Partner:		None
 Course:			CS3500, University of Utah, School of Computing
 GitHubID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-Date:			26-Jan-2023 1:30 PM
-Project:	  	Formula
+Date:			02-Feb-2023 3:00 PM
+Project:	  	FormulaTests
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```
 

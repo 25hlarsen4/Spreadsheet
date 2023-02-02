@@ -14,7 +14,23 @@
 /// 
 /// </summary>
 
+//Double.TryParse("2", out double result);
+//Double.TryParse("2.0", out double result2);
+//Double.TryParse("2.02", out double result3);
+//Double.TryParse("2.020", out double result4);
+//Console.WriteLine(result + " " + result2 + " " + result3 + " " + result4);
 
+Double.TryParse("1", out double res);
+Console.WriteLine(res/3);
+Console.WriteLine(0 == 0.0);
+Console.WriteLine(0.0 == 0.0);
+Console.WriteLine(0.00 == 0.0);
+Console.WriteLine(0.00000 == 0.0);
+Console.WriteLine(0.000001 == 0.0);
+Double.TryParse("5e-5", out double result);
+Console.WriteLine(result);
+Console.WriteLine(result / 10);
+Console.WriteLine(result.ToString());
 
 /// <summary>
 /// This method tests the Evaluate method on mathematical expressions only involving the + operator, both with and without 

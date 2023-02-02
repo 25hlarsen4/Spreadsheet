@@ -16,12 +16,6 @@
 //  (Version 1.2) Changed the definition of equality with regards
 //                to numeric tokens
 
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace SpreadsheetUtilities
@@ -29,7 +23,7 @@ namespace SpreadsheetUtilities
     /// <summary>
     /// Author:      Hannah Larsen
     /// Partner:     None
-    /// Date:        20-Jan-2023
+    /// Date:        27-Jan-2023
     /// Course:      CS3500, University of Utah, School of Computing
     /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
     /// 
@@ -72,9 +66,49 @@ namespace SpreadsheetUtilities
         /// </summary>
         Func<string, bool> validator;
 
-        // "^[a-zA-Z_]{1}[a-zA-Z_]*$"
+
         /// <summary>
-        /// This is a helper method to be called in the Formula constructors that will throw 
+        /// This is a helper method that determines if the input string is a 
+        /// variable by determining if it matches the variable regular expression.
+        /// </summary>
+        /// <param name="token"> The string to see if is a variable. </param>
+        /// <returns> Returns true if the input string is a variable, and false
+        /// otherwise. </returns>
+        private static Boolean isVariable(String token)
+        {
+            if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// This is a helper method meant to be called in the DetermineIfSyntacticallyIncorrect
+        /// method below that throws an exception if a variable is illegal after being normalized or 
+        /// invalid by the validator after being normalized.
+        /// </summary>
+        /// <param name="variable"> Represents the variable to determine the validity of. </param>
+        /// <exception cref="FormulaFormatException"> Throws a FormulaFormatException if a 
+        /// variable is found to be invalid. </exception>
+        private void DetermineVariableValidity(string variable)
+        {
+            if (!isVariable(normalizer(variable)))
+            {
+                throw new FormulaFormatException("A normalized variable was found to be illegal. Make sure the normalized versions of your variables fits the pattern of a letter or underscore followed by zero or more letters, underscores, or digits.");
+            }
+
+            if (!validator(normalizer(variable)))
+            {
+                throw new FormulaFormatException("A normalized variable was found to be invalid. Make sure the normalized versions of your variables meet the conditions of your validator.");
+            }
+        }
+
+
+        /// <summary>
+        /// This is a helper method to be called in the Formula constructors below that will throw 
         /// a FormulaFormatException if this Formula is syntactically incorrect.
         /// </summary>
         /// <exception cref="FormulaFormatException"> Throws a FormulaFormatException if this 
@@ -91,7 +125,6 @@ namespace SpreadsheetUtilities
                 throw new FormulaFormatException("The formula is empty. Make sure that the formula contains something to evaluate.");
             }
 
-            //tokens.MoveNext();       **** I dont think you need this bc the if statement already called it?? *****
             string prevToken = formTokens.Current;
 
             // the first token must be a (, number, or variable
@@ -100,18 +133,10 @@ namespace SpreadsheetUtilities
                 throw new FormulaFormatException("Formulas must start with either a number, a variable, or a (. Make sure that the formula starts with one of these things.");
             }
 
-            // now check that if it's a variable, it is also valid by the validator
+            // now check that if it's a variable, it is legal after being normalized and valid by the validator
             else if (isVariable(prevToken))
             {
-                if (!isVariable(normalizer(prevToken)))
-                {
-                    throw new FormulaFormatException("A normalized variable was found to be illegal. Make sure the normalized versions of your variables fits the pattern of a letter or underscore followed by zero or more letters, underscores, or digits.");
-                }
-
-                if (!validator(normalizer(prevToken)))
-                {
-                    throw new FormulaFormatException("A normalized variable was found to be invalid. Make sure the normalized versions of your variables meet the conditions of your validator.");
-                }
+                DetermineVariableValidity(prevToken);
             }
 
             if (prevToken == "(")
@@ -119,10 +144,9 @@ namespace SpreadsheetUtilities
                 numOfLeftParenth += 1;
             }
 
+            // now iterate through the rest of the tokens
             while (formTokens.MoveNext())
             {
-                // i think invalid token will already be found through the below process, but maybe not
-
                 if (numOfRightParenth > numOfLeftParenth)
                 {
                     throw new FormulaFormatException("The number of closing parenthesis was found to exceed the number of opening parenthesis at some point in the formula. Make sure that the number of closing parenthesis never exceeds the number of opening parenthesis.");
@@ -137,18 +161,10 @@ namespace SpreadsheetUtilities
                         throw new FormulaFormatException("Something other than a number, variable, or ( was found to be following an operator or (. Make sure that anything following an operator or ( is either a number, variable, or (.");
                     }
 
-                    // if current was a variable, make sure it's valid
+                    // if current is a variable, make sure it's valid
                     else if (isVariable(formTokens.Current))
                     {
-                        if (!isVariable(normalizer(formTokens.Current)))
-                        {
-                            throw new FormulaFormatException("A normalized variable was found to be illegal. Make sure the normalized versions of your variables fits the pattern of a letter or underscore followed by zero or more letters, underscores, or digits.");
-                        }
-
-                        if (!validator(normalizer(formTokens.Current)))
-                        {
-                            throw new FormulaFormatException("A normalized variable was found to be invalid. Make sure the normalized versions of your variables meet the conditions of your validator.");
-                        }
+                        DetermineVariableValidity(formTokens.Current);
                     }
 
                     else if (formTokens.Current == "(")
@@ -157,7 +173,7 @@ namespace SpreadsheetUtilities
                     }
                 }
 
-                // if previous is number, variable, or )    (i think at this point we already know a variable would be valid)
+                // if previous is number, variable, or )
                 else if ((Double.TryParse(prevToken, out double result3)) || (prevToken == ")") || isVariable(prevToken))
                 {
                     // current must be an operator or )
@@ -175,7 +191,7 @@ namespace SpreadsheetUtilities
                 prevToken = formTokens.Current;
             }
 
-            // prevToken should now hold the last token, so check if it's valid       (again i think we already know a variable would be valid)
+            // prevToken should now hold the last token, so check if it's valid
             if ((prevToken != ")") && !(Double.TryParse(prevToken, out double result4)) && !isVariable(prevToken))
             {
                 throw new FormulaFormatException("Formulas must end with either a ), number, or variable. Make sure that the formula ends with one of these things.");
@@ -189,30 +205,14 @@ namespace SpreadsheetUtilities
 
 
         /// <summary>
-        /// This is a helper method that determines if the input string is a 
-        /// variable by determining if it matches the variable regular expression.
-        /// </summary>
-        /// <param name="token"> The string to see if is a variable. </param>
-        /// <returns> Returns true if the input string is a variable, and false
-        /// otherwise. </returns>
-        private static Boolean isVariable(String token)
-        {
-            if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            {
-                return true;
-            }
-            return false;
-        }
-
-
-        /// <summary>
         /// Creates a Formula from a string that consists of an infix expression written as
         /// described in the class comment.  If the expression is syntactically invalid,
         /// throws a FormulaFormatException with an explanatory Message.
         /// 
         /// The associated normalizer is the identity function, and the associated validator
-        /// maps every string to true.  
+        /// maps every string to true. 
         /// </summary>
+        /// <param name="formula"> Represents the expression. </param>
         public Formula(String formula) :
             this(formula, s => s, s => true)
         {
@@ -233,15 +233,10 @@ namespace SpreadsheetUtilities
         /// 
         /// If the formula contains a variable v such that isValid(normalize(v)) is false,
         /// throws a FormulaFormatException with an explanatory message.
-        /// 
-        /// Suppose that N is a method that converts all the letters in a string to upper case, and
-        /// that V is a method that returns true only if a string consists of one letter followed
-        /// by one digit.  Then:
-        /// 
-        /// new Formula("x2+y3", N, V) should succeed
-        /// new Formula("x+y3", N, V) should throw an exception, since V(N("x")) is false
-        /// new Formula("2x+y3", N, V) should throw an exception, since "2x+y3" is syntactically incorrect.
         /// </summary>
+        /// <param name="formula"> Represents the expression. </param>
+        /// <param name="normalize"> Represents the variable normalizer. </param>
+        /// <param name="isValid"> Represents the variable validator. </param>
         public Formula(String formula, Func<string, string> normalize, Func<string, bool> isValid)
         {
             normalizer = normalize;
@@ -261,7 +256,7 @@ namespace SpreadsheetUtilities
         /// <param name="operand2"> operand2 represents the second operand to either multiply or divide with the first. </param>
         /// <param name="vals"> vals is the value stack. </param>
         /// <param name="operators"> operators is the operator stack. </param>
-        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentException"> Throws an ArgumentException if a division by zero occurs. </exception>
         private static void MultiplyOrDivide(double operand1, double operand2, Stack<double> vals, Stack<string> operators)
         {
             string op = operators.Pop();
@@ -269,9 +264,10 @@ namespace SpreadsheetUtilities
             {
                 vals.Push(operand1 * operand2);
             }
+
             else
             {
-                // are we supposed to be doing float div???
+                // make sure division by zero does not occur
                 if (operand2 == 0.0)
                 {
                     throw new ArgumentException();
@@ -311,35 +307,14 @@ namespace SpreadsheetUtilities
         /// via lookup(normalize(v)). (Here, normalize is the normalizer that was passed to 
         /// the constructor.)
         /// 
-        /// For example, if L("x") is 2, L("X") is 4, and N is a method that converts all the letters 
-        /// in a string to upper case:
-        /// 
-        /// new Formula("x+7", N, s => true).Evaluate(L) is 11
-        /// new Formula("x+7").Evaluate(L) is 9
-        /// 
         /// Given a variable symbol as its parameter, lookup returns the variable's value 
         /// (if it has one) or throws an ArgumentException (otherwise).
-        /// 
-        /// If no undefined variables or divisions by zero are encountered when evaluating 
-        /// this Formula, the value is returned.  Otherwise, a FormulaError is returned.  
-        /// The Reason property of the FormulaError should have a meaningful explanation.
-        ///
-        /// This method should never throw an exception.
         /// </summary>
-        /// ******************** lookup is a delegate that takes in a string and returns a double ********************
+        /// <param name="lookup"> Represents the delegate to look up the value of variables with. </param>
+        /// <returns> Returns a FormulaError if an undefined variable or division by zero is encountered,
+        /// otherwise returns the value of the formula. </returns>
         public object Evaluate(Func<string, double> lookup)
         {
-            //if (expression == null)
-            //{
-            //    throw new ArgumentException();
-            //}
-
-            // do I need to do this part????
-            //for (int i = 0; i < tokens.Count; i++)
-            //{
-            //    tokens[i] = tokens[i].Trim();
-            //}
-
             // these stacks will hold the numerical values and operators of the input expression, respectively
             Stack<double> vals = new Stack<double>();
             Stack<string> operators = new Stack<string>();
@@ -347,12 +322,6 @@ namespace SpreadsheetUtilities
             // process each token in order
             foreach (string token in tokens)
             {
-                // if the token is an empty string due to whitespaces in the input expression, ignore it
-                //if (token == "")
-                //{
-                //    continue;
-                //}
-
                 // if the token is a number
                 if (Double.TryParse(token, out double result))
                 {
@@ -364,12 +333,13 @@ namespace SpreadsheetUtilities
                         try
                         {
                             MultiplyOrDivide(val, result, vals, operators);
-                        } catch (ArgumentException e)
+                        }
+                        catch (ArgumentException e)
                         {
                             return new FormulaError("A division by zero occurred.");
                         }
-                        
                     }
+
                     else
                     {
                         vals.Push(result);
@@ -384,6 +354,7 @@ namespace SpreadsheetUtilities
                         // apply the top of the operator stack to the top 2 values of the vals stack
                         AddOrSubtract(vals, operators);
                     }
+
                     operators.Push(token);
                 }
 
@@ -427,7 +398,6 @@ namespace SpreadsheetUtilities
                 // else (therefore the token is a variable)
                 else
                 {
-                    // do i need to check for this????
                     if (lookup == null)
                     {
                         return new FormulaError("A variable was encountered but no lookup delegate was provided.");
@@ -448,7 +418,8 @@ namespace SpreadsheetUtilities
                         {
                             vals.Push(variableValue);
                         }
-                    } catch (ArgumentException e)
+                    }
+                    catch (ArgumentException e)
                     {
                         return new FormulaError("An undefined variable was encountered.");
                     }
@@ -482,24 +453,22 @@ namespace SpreadsheetUtilities
             }
         }
 
+
         /// <summary>
         /// Enumerates the normalized versions of all of the variables that occur in this 
         /// formula.  No normalization may appear more than once in the enumeration, even 
         /// if it appears more than once in this Formula.
-        /// 
-        /// For example, if N is a method that converts all the letters in a string to upper case:
-        /// 
-        /// new Formula("x+y*z", N, s => true).GetVariables() should enumerate "X", "Y", and "Z"
-        /// new Formula("x+X*z", N, s => true).GetVariables() should enumerate "X" and "Z".
-        /// new Formula("x+X*z").GetVariables() should enumerate "x", "X", and "z".
         /// </summary>
+        /// <returns> An IEnumerable of the variables in this formula without repeats. </returns>
         public IEnumerable<String> GetVariables()
         {
             HashSet<string> variables = new HashSet<string>();
 
             foreach (string token in tokens)
             {
-                if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*") && validator(token))
+                // if the token is a valid variable and not a duplicate, put the normalized
+                // version in the set
+                if (isVariable(token) && validator(token))
                 {
                     string normalized = normalizer(token);
                     if (!variables.Contains(normalized))
@@ -516,22 +485,15 @@ namespace SpreadsheetUtilities
         /// Returns a string containing no spaces which, if passed to the Formula
         /// constructor, will produce a Formula f such that this.Equals(f).  All of the
         /// variables in the string should be normalized.
-        /// 
-        /// For example, if N is a method that converts all the letters in a string to upper case:
-        /// 
-        /// new Formula("x + y", N, s => true).ToString() should return "X+Y"
-        /// new Formula("x + Y").ToString() should return "x+Y"
         /// </summary>
+        /// <returns> Returns the string representation of this formula. </returns>
         public override string ToString()
         {
             string formulaString = "";
             foreach (string token in tokens)
             {
-                // is it possible for there to be an empty string???
-                // do i need to worry about variables being valid???
-
                 // if token is a variable, normalize it
-                if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+                if (isVariable(token))
                 {
                     formulaString += normalizer(token);
                 }
@@ -552,9 +514,8 @@ namespace SpreadsheetUtilities
             return formulaString;
         }
 
+
         /// <summary>
-        ///  <change> make object nullable </change>
-        ///
         /// If obj is null or obj is not a Formula, returns false.  Otherwise, reports
         /// whether or not this Formula and obj are equal.
         /// 
@@ -566,24 +527,15 @@ namespace SpreadsheetUtilities
         /// eliminates any inconsistencies due to limited floating point precision.
         /// Variable tokens are considered equal if their normalized forms are equal, as 
         /// defined by the provided normalizer.
-        /// 
-        /// For example, if N is a method that converts all the letters in a string to upper case:
-        ///  
-        /// new Formula("x1+y2", N, s => true).Equals(new Formula("X1  +  Y2")) is true
-        /// new Formula("x1+y2").Equals(new Formula("X1+Y2")) is false
-        /// new Formula("x1+y2").Equals(new Formula("y2+x1")) is false
-        /// new Formula("2.0 + x7").Equals(new Formula("2.000 + x7")) is true
         /// </summary>
+        /// <param name="obj"> the object to compare to this formula </param>
+        /// <returns> True if this formula equals the passed in object, false otherwise. </returns>
         public override bool Equals(object? obj)
         {
             if (obj == null || obj is not Formula)
             {
                 return false;
             }
-
-            //formula? form = obj as formula;
-            //Formula? form = (Formula)obj;
-            //formula form = (formula)obj;
 
             else if (this.ToString() == obj.ToString())
             {
@@ -594,77 +546,27 @@ namespace SpreadsheetUtilities
             {
                 return false;
             }
-
-            //// if each formula has a different number of tokens, we know they're not equal
-            //if (this.tokens.Count() != form.tokens.Count())
-            //{
-            //    return false;
-            //}
-
-            //// now we know they have the same number of tokens
-            //// convert the tokens into lists so they can be indexable
-            //List<string> tokens1 = this.tokens.ToList();
-            //List<string> tokens2 = form.tokens.ToList();
-
-            //for (int i = 0; i < tokens1.Count(); i++)
-            //{
-            //    // all i need to do?
-
-            //    // if the token is a number
-            //    if (double.TryParse(tokens1[i], out double result))
-            //    {
-            //        if (!double.TryParse(tokens2[i], out double result2))
-            //        {
-            //            return false;
-            //        }
-
-            //        // now we know both tokens are numbers
-            //        else if (result.ToString() != result2.ToString())
-            //        {
-            //            return false;
-            //        }
-            //    }
-
-            //    // if the token is a variable
-            //    else if (Regex.IsMatch(tokens1[i], @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            //    {
-            //        if (!Regex.IsMatch(tokens2[i], @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            //        {
-            //            return false;
-            //        }
-
-            //        // now we know both tokens are variables
-            //        else if (this.normalizer(tokens1[i]) != form.normalizer(tokens2[i]))
-            //        {
-            //            return false;
-            //        }
-            //    }
-
-            //    // otherwise the token is just an operator
-            //    else if (tokens1[i] != tokens2[i])
-            //    {
-            //        return false;
-            //    }
-            //}
-
-            //return true;
         }
 
         /// <summary>
-        ///   <change> We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
+        /// We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
         /// Reports whether f1 == f2, using the notion of equality from the Equals method.
-        /// 
         /// </summary>
+        /// <param name="f1"> The first formula to compare. </param>
+        /// <param name="f2"> The second formula to compare. </param>
+        /// <returns> True if f1 == f2, false otherwise. </returns>
         public static bool operator ==(Formula f1, Formula f2)
         {
             return f1.Equals(f2);
         }
 
         /// <summary>
-        ///   <change> We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
-        ///   <change> Note: != should almost always be not ==, if you get my meaning </change>
-        ///   Reports whether f1 != f2, using the notion of equality from the Equals method.
+        /// We are now using Non-Nullable objects.  Thus neither f1 nor f2 can be null!</change>
+        /// Reports whether f1 != f2, using the notion of equality from the Equals method.
         /// </summary>
+        /// <param name="f1"> The first formula to compare. </param>
+        /// <param name="f2"> The second formula to compare. </param>
+        /// <returns> True if f1 != f2, false otherwise. </returns>
         public static bool operator !=(Formula f1, Formula f2)
         {
             return !f1.Equals(f2);
@@ -675,10 +577,13 @@ namespace SpreadsheetUtilities
         /// case that f1.GetHashCode() == f2.GetHashCode().  Ideally, the probability that two 
         /// randomly-generated unequal Formulae have the same hash code should be extremely small.
         /// </summary>
+        /// <returns> A hash code for this formula. </returns>
         public override int GetHashCode()
         {
             IEnumerator<string> e = this.tokens.GetEnumerator();
             int code = 0;
+
+            // iterate through each token and use string's GetHashCode method to create an accumulation
             while (e.MoveNext())
             {
                 if (Double.TryParse(e.Current, out double result))
@@ -686,6 +591,7 @@ namespace SpreadsheetUtilities
                     code += result.ToString().GetHashCode();
                 }
 
+                // if token is a variable, make sure it's normalized
                 else if (Regex.IsMatch(e.Current, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
                 {
                     code += this.normalizer(e.Current).GetHashCode();
@@ -706,6 +612,8 @@ namespace SpreadsheetUtilities
         /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
         /// match one of those patterns.  There are no empty tokens, and no token contains white space.
         /// </summary>
+        /// <param name="formula"> The formula to get tokens from. </param>
+        /// <returns> An IEnumerable of the passed in formula's tokens. </returns>
         private static IEnumerable<string> GetTokens(String formula)
         {
             // Patterns for individual tokens
@@ -740,6 +648,7 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Constructs a FormulaFormatException containing the explanatory message.
         /// </summary>
+        /// <param name="message"> The explanatory message. </param>
         public FormulaFormatException(String message)
             : base(message)
         {
@@ -754,7 +663,7 @@ namespace SpreadsheetUtilities
         /// <summary>
         /// Constructs a FormulaError containing the explanatory reason.
         /// </summary>
-        /// <param name="reason"></param>
+        /// <param name="reason"> The reason for the error. </param>
         public FormulaError(String reason)
             : this()
         {
@@ -767,16 +676,3 @@ namespace SpreadsheetUtilities
         public string Reason { get; private set; }
     }
 }
-
-
-// <change>
-//   If you are using Extension methods to deal with common stack operations (e.g., checking for
-//   an empty stack before peeking) you will find that the Non-Nullable checking is "biting" you.
-//
-//   To fix this, you have to use a little special syntax like the following:
-//
-//       public static bool OnTop<T>(this Stack<T> stack, T element1, T element2) where T : notnull
-//
-//   Notice that the "where T : notnull" tells the compiler that the Stack can contain any object
-//   as long as it doesn't allow nulls!
-// </change>
