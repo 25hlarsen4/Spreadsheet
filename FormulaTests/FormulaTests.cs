@@ -19,19 +19,12 @@ namespace FormulaTests
     [TestClass]
     public class FormulaTests
     {
-
-        //[TestInitialize]
-        //public void TestInitialize()
-        //{
-
-        //}
-
         /// <summary>
         /// This tests that the formula constructor throws a FormulaFormatException when
         /// the formula has no tokens.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula()
+        public void TestSyntacticallyIncorrectFormulaNoTokens()
         {
             Action a = () => new Formula("");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -43,7 +36,7 @@ namespace FormulaTests
         /// the formula has more closing parenthesis than opening ones.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula2()
+        public void TestSyntacticallyIncorrectFormulaMoreClosingParenthesisThanOpen()
         {
             Action a = () => new Formula("2+(3-4))");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -56,23 +49,35 @@ namespace FormulaTests
         /// of code coverage.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula10()
+        public void TestSyntacticallyIncorrectFormulaMoreClosingParenthesisThanOpen2()
         {
             Action a = () => new Formula("(3 + 2)) - a2");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
         }
 
 
-        ///// <summary>
-        ///// This tests that the formula constructor throws a FormulaFormatException when
-        ///// the formula includes a negative number.
-        ///// </summary>
-        //[TestMethod]
-        //public void TestSyntacticallyIncorrectFormula3()
-        //{
-        //    Action a = () => new Formula("-2");
-        //    Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
-        //}
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// a variable is found to be in an illegal format after being normalized.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectNormalizerInvalidates()
+        {
+            Action a = () => new Formula("_a1", s => "4", s => true);
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This also tests that the formula constructor throws a FormulaFormatException when
+        /// a variable is found to be in an illegal format after being normalized, and is here
+        /// for the sake of code coverage.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectNormalizerInvalidates2()
+        {
+            Action a = () => new Formula("2+a1", s => "4", s => true);
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
 
 
         /// <summary>
@@ -80,7 +85,19 @@ namespace FormulaTests
         /// the formula includes a negative number.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula4()
+        public void TestSyntacticallyIncorrectFormulaNegativeNumber()
+        {
+            Action a = () => new Formula("-2");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException in
+        /// another case in which the formula includes a negative number.
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormulaNegativeNumber2()
         {
             Action a = () => new Formula("3 + (-4)");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -92,9 +109,21 @@ namespace FormulaTests
         /// a ) is not followed by an operator or )
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula5()
+        public void TestSyntacticallyIncorrectFormulaInvalidOrdering()
         {
             Action a = () => new Formula("3 + 2)(");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
+        }
+
+
+        /// <summary>
+        /// This tests that the formula constructor throws a FormulaFormatException when
+        /// a number is not followed by an operator or ).
+        /// </summary>
+        [TestMethod]
+        public void TestSyntacticallyIncorrectFormulaInvalidOrdering2()
+        {
+            Action a = () => new Formula("3 * 2 3");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
         }
 
@@ -104,7 +133,7 @@ namespace FormulaTests
         /// the formula does not end in a ), number, or variable.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula6()
+        public void TestSyntacticallyIncorrectFormulaInvalidEnding()
         {
             Action a = () => new Formula("3 * 2 -");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -116,7 +145,7 @@ namespace FormulaTests
         /// the formula does not start with a (, number, or variable.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula11()
+        public void TestSyntacticallyIncorrectFormula1InvalidBeginning()
         {
             Action a = () => new Formula("+ 3 * 2");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -128,7 +157,7 @@ namespace FormulaTests
         /// the formula includes an invalid variable as determined by the passed in validator.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula7()
+        public void TestSyntacticallyIncorrectFormulaInvalidVariable()
         {
             Action a = () => new Formula("3 * 2 - a2", s => s, s => false);
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -141,7 +170,7 @@ namespace FormulaTests
         /// is here for the sake of code coverage.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula8()
+        public void TestSyntacticallyIncorrectFormulaInvalidVariable2()
         {
             Action a = () => new Formula("a2 * 2", s => s, s => false);
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
@@ -150,26 +179,14 @@ namespace FormulaTests
 
         /// <summary>
         /// This tests that the formula constructor throws a FormulaFormatException when
-        /// a number is not followed by an operator or ).
+        /// the formula includes an invalid token.
         /// </summary>
         [TestMethod]
-        public void TestSyntacticallyIncorrectFormula9()
+        public void TestSyntacticallyIncorrectFormulaInvalidToken()
         {
-            Action a = () => new Formula("3 * 2 3");
+            Action a = () => new Formula("2 - !");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
         }
-
-
-        ///// <summary>
-        ///// This tests that the formula constructor throws a FormulaFormatException when
-        ///// a number is not followed by an operator or ).
-        ///// </summary>
-        //[TestMethod]
-        //public void TestSyntacticallyIncorrectFormulaInvalidVariable()
-        //{
-        //    Action a = () => new Formula("(3 + 2) - a2", s => s, s => false);
-        //    Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
-        //}
 
 
         /// <summary>
@@ -195,14 +212,56 @@ namespace FormulaTests
 
 
         /// <summary>
-        /// This tests that a complicated expression using a mixture of operations can 
-        /// be correctly evaluated.
+        /// This tests that the evaluate method can correctly evaluate a series of 
+        /// complicated expressions.
         /// </summary>
         [TestMethod]
         public void TestComplicatedEvaluate()
         {
-            Formula form = new Formula("2+3*5+(3+4*8)*5+2");
-            Assert.AreEqual(form.Evaluate(null), Convert.ToDouble(194));
+            Formula a = new Formula("30/5/2");
+            Formula b = new Formula("2   +(7- 1) / 2");
+            Formula c = new Formula("5+10/2-1*3");
+            Formula d = new Formula("(3+5+(2*2)*(3*3))");
+            Formula e = new Formula("(2+ 5) /  2* (4-1)");
+            Formula f = new Formula("((3+5+(2*2)*(3*3)) /2) *3");
+            Formula g = new Formula("(((3 - 4) - 2) * 5) / 2");
+            Formula h = new Formula("(2+ 5) /  1.5 * (4-1)");
+            Formula k = new Formula("2 + (_a1 - (2.5 / _a1))");
+
+            Assert.AreEqual(Convert.ToDouble(3), a.Evaluate(null));
+            Assert.AreEqual(Convert.ToDouble(5), b.Evaluate(null));
+            Assert.AreEqual(Convert.ToDouble(7), c.Evaluate(null));
+            Assert.AreEqual(Convert.ToDouble(44), d.Evaluate(null));
+            Assert.AreEqual(10.5, e.Evaluate(null));
+            Assert.AreEqual(Convert.ToDouble(66), f.Evaluate(null));
+            Assert.AreEqual(-7.5, g.Evaluate(null));
+            Assert.AreEqual(Convert.ToDouble(14), h.Evaluate(null));
+            Assert.AreEqual(2.75, k.Evaluate(s => 2));
+        }
+
+
+        /// <summary>
+        /// This tests that the evaluate method correctly truncates even a 
+        /// number that was input into the formula rather than produced by it.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateInputTruncates()
+        {
+            Formula form = new Formula("1.00000000000000002 + 2");
+            Assert.AreEqual(Convert.ToDouble(3), form.Evaluate(null));
+        }
+
+
+        /// <summary>
+        /// This tests that the evaluate method can handle repeating decimals.
+        /// </summary>
+        [TestMethod]
+        public void TestEvaluateRepeatingDecimals()
+        {
+            Formula a = new Formula("(2+ 5) /  1.5 * (4-2)");
+            Formula b = new Formula("2/3");
+            Assert.AreEqual(9.3333333333333333, a.Evaluate(null));
+            Assert.AreEqual(0.6666666666666666, b.Evaluate(null));
         }
 
 
