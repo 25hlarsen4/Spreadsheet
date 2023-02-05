@@ -1,4 +1,4 @@
-﻿using Spreadsheet;
+﻿//using Spreadsheet;
 using SpreadsheetUtilities;
 using System;
 using System.Collections.Generic;
@@ -119,11 +119,17 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            // what if the name doesn't exist?????????????
-            Cell cell = cellMap[name];
-            return cell.getContent();
+            if (cellMap.ContainsKey(name))
+            {
+                Cell cell = cellMap[name];
+                return cell.getContent();
+            }
+
+            return "";
         }
 
+        /// Every name already exists by default?
+        /// 
         /// <summary>
         ///  Set the contents of the named cell to the given number.  
         /// </summary>
@@ -153,14 +159,26 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            // what if the name doesn't exist?????????????
-            Cell cell = cellMap[name];
-            cell.setContent(number);
+            // if the name didn't already exist, we don't need to alter dependencies
+            if (!cellMap.ContainsKey(name))
+            {
+                Cell newCell = new Cell(name, number);
+                cellMap.Add(name, newCell);
+            }
+
+            else
+            {
+                Cell cell = cellMap[name];
+
+                // if the cell used to contain a formula w variables, we must remove those dependencies
+                graph.ReplaceDependees(name, new HashSet<string>());
+
+                cell.setContent(number);
+            }
 
             // would just get direct dependents work?
-            ISet<string> dependents = (ISet<string>)GetCellsToRecalculate(name);
-            dependents.Add(name);
-            return dependents;
+            LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
+            return new HashSet<string>(dependents);
         }
 
         /// <summary>
@@ -200,13 +218,25 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            // what if the name doesn't exist?????????????
-            Cell cell = cellMap[name];
-            cell.setContent(text);
+            // if the name didn't already exist, we don't need to alter dependencies
+            if (!cellMap.ContainsKey(name))
+            {
+                Cell newCell = new Cell(name, text);
+                cellMap.Add(name, newCell);
+            }
 
-            ISet<string> dependents = (ISet<string>)GetCellsToRecalculate(name);
-            dependents.Add(name);
-            return dependents;
+            else
+            {
+                Cell cell = cellMap[name];
+
+                // if the cell used to contain a formula w variables, we must remove those dependencies
+                graph.ReplaceDependees(name, new HashSet<string>());
+
+                cell.setContent(text);
+            }
+
+            LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
+            return new HashSet<string>(dependents);
         }
 
         /// <summary>
@@ -253,17 +283,36 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            // check if the cell name is in the formula??
+            // check for cycles
             ISet<string> variables = (ISet<string>)formula.GetVariables();
-            ISet<string> dependents = (ISet<string>)GetCellsToRecalculate(variables);
-            dependents.Add(name);
+            GetCellsToRecalculate(variables);
             
-            // now we know a CircularException was not thrown, so set the cell contents
-            Cell cell = cellMap[name];
-            cell.setContent(formula);
+            // now we know a CircularException was not thrown, so we can set the cell contents
+            if (!cellMap.ContainsKey(name))
+            {
+                Cell newCell = new Cell(name, formula);
+
+                IEnumerable<string> vars = formula.GetVariables();
+                graph.ReplaceDependees(name, vars);
+
+                cellMap.Add(name, newCell);
+            }
+
+            else
+            {
+                Cell cell = cellMap[name];
+
+                // if the cell used to contain a formula with variables, we must replace dependencies
+                // otherwise we must only add dependencies
+                IEnumerable<string> vars = formula.GetVariables();
+                graph.ReplaceDependees(name, vars);
+
+                cell.setContent(formula);
+            }
 
             // finally return the set of dependents
-            return dependents;
+            LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
+            return new HashSet<string>(dependents);
         }
 
         /// <summary>
@@ -314,11 +363,28 @@ namespace SS
         {
             private string name;
             private Object content;
+            //private Object value;
 
             public Cell(string name, Object content)
             {
                 this.name = name;
                 this.content = content;
+
+                //if (content is string || content is double)
+                //{
+                //    this.value = content;
+                //}
+
+                //else if (content is Formula)
+                //{
+                //    // what do i do here?
+                //    this.value = (Formula)content.Evaluate(null);
+                //}
+
+                //else
+                //{
+                //    // anything here?
+                //}
             }
 
             public Object getContent()
