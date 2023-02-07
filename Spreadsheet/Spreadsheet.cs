@@ -80,13 +80,29 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private Dictionary<string, Cell> cellMap;
+        /// <summary>
+        /// Since every cell name already exists in a spreadsheet by default, this dictionary 
+        /// will just hold a mapping between all non-empty cells (cells where their contents are 
+        /// not the empty string) and their names. (where the keys are names and the values are 
+        /// Cells). If a name is not in this map, the cell corresponding to that name is empty.
+        /// </summary>
+        private Dictionary<string, Cell> nonemptyCellMap;
+
+
         private DependencyGraph graph;
 
         public Spreadsheet()
         {
-            cellMap = new Dictionary<string, Cell>();
+            nonemptyCellMap = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
+        }
+
+        private static void DetermineIfNameIsInvalid(string name)
+        {
+            if (name == null || !Regex.IsMatch(name, @"^[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            {
+                throw new InvalidNameException();
+            }
         }
 
         /// <summary>
@@ -95,7 +111,7 @@ namespace SS
         /// </summary>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
-            return cellMap.Keys;
+            return nonemptyCellMap.Keys;
         }
 
         /// <summary>
@@ -114,14 +130,11 @@ namespace SS
         /// </returns>
         public override object GetCellContents(string name)
         {
-            if (name == null || !Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            {
-                throw new InvalidNameException();
-            }
+            DetermineIfNameIsInvalid(name);
 
-            if (cellMap.ContainsKey(name))
+            if (nonemptyCellMap.ContainsKey(name))
             {
-                Cell cell = cellMap[name];
+                Cell cell = nonemptyCellMap[name];
                 return cell.getContent();
             }
 
@@ -154,21 +167,18 @@ namespace SS
         /// </returns>
         public override ISet<string> SetCellContents(string name, double number)
         {
-            if (name == null || !Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            {
-                throw new InvalidNameException();
-            }
+            DetermineIfNameIsInvalid(name);
 
-            // if the name didn't already exist, we don't need to alter dependencies
-            if (!cellMap.ContainsKey(name))
+            // if the cell was previously empty, we don't need to alter dependencies
+            if (!nonemptyCellMap.ContainsKey(name))
             {
                 Cell newCell = new Cell(name, number);
-                cellMap.Add(name, newCell);
+                nonemptyCellMap.Add(name, newCell);
             }
 
             else
             {
-                Cell cell = cellMap[name];
+                Cell cell = nonemptyCellMap[name];
 
                 // if the cell used to contain a formula w variables, we must remove those dependencies
                 graph.ReplaceDependees(name, new HashSet<string>());
@@ -176,7 +186,6 @@ namespace SS
                 cell.setContent(number);
             }
 
-            // would just get direct dependents work?
             LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
             return new HashSet<string>(dependents);
         }
@@ -208,26 +217,23 @@ namespace SS
         /// </returns>
         public override ISet<string> SetCellContents(string name, string text)
         {
+            DetermineIfNameIsInvalid(name);
+
             if (text == null)
             {
                 throw new ArgumentNullException();
             }
 
-            if (name == null || !Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            {
-                throw new InvalidNameException();
-            }
-
-            // if the name didn't already exist, we don't need to alter dependencies
-            if (!cellMap.ContainsKey(name))
+            // if the cell was previously empty, we don't need to alter dependencies
+            if (!nonemptyCellMap.ContainsKey(name))
             {
                 Cell newCell = new Cell(name, text);
-                cellMap.Add(name, newCell);
+                nonemptyCellMap.Add(name, newCell);
             }
 
             else
             {
-                Cell cell = cellMap[name];
+                Cell cell = nonemptyCellMap[name];
 
                 // if the cell used to contain a formula w variables, we must remove those dependencies
                 graph.ReplaceDependees(name, new HashSet<string>());
@@ -273,14 +279,11 @@ namespace SS
         /// </returns>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
+            DetermineIfNameIsInvalid(name);
+
             if (formula == null)
             {
                 throw new ArgumentNullException();
-            }
-
-            if (name == null || !Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            {
-                throw new InvalidNameException();
             }
 
             // check for cycles
@@ -288,24 +291,25 @@ namespace SS
             GetCellsToRecalculate(variables);
             
             // now we know a CircularException was not thrown, so we can set the cell contents
-            if (!cellMap.ContainsKey(name))
+
+            // if the cell was previously empty, 
+            if (!nonemptyCellMap.ContainsKey(name))
             {
                 Cell newCell = new Cell(name, formula);
 
-                IEnumerable<string> vars = formula.GetVariables();
-                graph.ReplaceDependees(name, vars);
+                // since the cell was previously empty, it previously had no dependees, now must add the new ones
+                graph.ReplaceDependees(name, variables);
 
-                cellMap.Add(name, newCell);
+                nonemptyCellMap.Add(name, newCell);
             }
 
             else
             {
-                Cell cell = cellMap[name];
+                Cell cell = nonemptyCellMap[name];
 
-                // if the cell used to contain a formula with variables, we must replace dependencies
-                // otherwise we must only add dependencies
-                IEnumerable<string> vars = formula.GetVariables();
-                graph.ReplaceDependees(name, vars);
+                // if the cell used to contain a formula with variables, we must replace dependees,
+                // otherwise we must only add dependees
+                graph.ReplaceDependees(name, variables);
 
                 cell.setContent(formula);
             }
@@ -344,17 +348,9 @@ namespace SS
         ///   <para>The direct dependents of A1 are B1 and C1</para>
         /// 
         /// </returns>
-        protected override IEnumerable<string> GetDirectDependents(string name)
+        public override IEnumerable<string> GetDirectDependents(string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (!Regex.IsMatch(name, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
-            {
-                throw new InvalidNameException();
-            }
+            DetermineIfNameIsInvalid(name);
 
             return graph.GetDependents(name);
         }
