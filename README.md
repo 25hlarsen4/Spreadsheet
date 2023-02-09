@@ -5,7 +5,7 @@ StartDate:			13-Jan-2023
 Course:				CS3500, University of Utah, School of Computing
 GitHubID:			25hlarsen4
 Repo:				https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-CommitDate:			09-Feb-2023 10:10 am
+CommitDate:			09-Feb-2023 2:45 pm
 Solution:			Spreadsheet
 Copyright:			CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```
@@ -30,6 +30,20 @@ between cells to then be able to accurately compute and update formulas in the c
 Now, as of the completion of Assignment 4, we have started the internals of an actual spreadsheet program. More specifically,
 we have a working representation of a spreadsheet that can set cell contents and keep track of dependencies between cells, 
 using the DependencyGraph created in Assignment 2.
+
+# Examples of Good Software Practices:
+
+First, my use of DRY programming shows good software practices. I used DRY programming by using inheritdoc rather than explicitly
+repeating method headers that were already written in the AbstractSpreadsheet class.
+Furthermore, I used the idea of separation of concerns to show good software practice. Specifically, I did this by not yet 
+worrying about representing the values of cells. Although every cell will eventually have a value, the methods we implemented 
+only concerned the cells' contents, so I did not yet account for cells' values in the Cell class.
+Finally, I used code re-use to show good software practice. I specifically did this by creating a helper method to use in 
+each of the three SetCellContents methods since each of those methods included a lot of the same code.
+See the following list for more good software practices that I used.
+
+- Short methods
+- Well named methods
 
 # Time Expenditures:
 

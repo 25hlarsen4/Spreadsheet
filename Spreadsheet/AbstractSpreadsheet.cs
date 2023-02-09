@@ -238,7 +238,7 @@ namespace SS
         /// <summary>
         ///   <para>
         ///     Given a list of names of cells that have changed, return a list of
-        ///     all cells that must be recalculated. (any cells dependent on said cells i think)****************
+        ///     all cells that must be recalculated.
         ///   </para>
         ///   
         ///   <para>

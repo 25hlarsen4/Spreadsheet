@@ -45,6 +45,39 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
+        /// This tests the SetCellContents method in the case that a previously
+        /// nonempty cell is set to be empty, ie is set to contain the empty string.
+        /// </summary>
+        [TestMethod]
+        public void TestSetCellContentsToEmptyString()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+
+            ISet<string> aset = sheet.SetCellContents("a1", new Formula("b1+1"));
+            Assert.IsTrue(aset.Contains("a1"));
+
+            ISet<string> bset = sheet.SetCellContents("b1", 2);
+            Assert.IsTrue(bset.Contains("b1"));
+            Assert.IsTrue(bset.Contains("a1"));
+
+            // make sure that both a1 and b1 are considered nonempty
+            IEnumerable<string> nonEmptyCells = sheet.GetNamesOfAllNonemptyCells();
+            Assert.AreEqual(2, nonEmptyCells.Count());
+            Assert.IsTrue(nonEmptyCells.Contains("a1"));
+            Assert.IsTrue(nonEmptyCells.Contains("b1"));
+
+            // make b1 empty
+            ISet<string> bNewSet = sheet.SetCellContents("b1", "");
+            Assert.IsTrue(bNewSet.Contains("b1"));
+            Assert.IsTrue(bNewSet.Contains("a1"));
+
+            // make sure that only a1 is considered nonempty now
+            IEnumerable<string> newNonEmptyCells = sheet.GetNamesOfAllNonemptyCells();
+            Assert.AreEqual(1, newNonEmptyCells.Count());
+            Assert.IsTrue(newNonEmptyCells.Contains("a1"));
+        }
+
+        /// <summary>
         /// This tests the SetCellContents method where the cell contents are
         /// set to a Formula.
         /// </summary>

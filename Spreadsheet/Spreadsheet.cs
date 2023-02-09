@@ -92,7 +92,7 @@ namespace SS
         /// <param name="contents"> The string, double, or Formula to set the cell contents to. </param>
         private void SetCellContentsHelper(string name, object contents)
         {
-            // if the cell was previously empty, we don't need to alter dependencies
+            // if the cell was previously empty, we don't need to alter dependees
             if (!nonemptyCellMap.ContainsKey(name))
             {
                 Cell newCell = new Cell(name, contents);
@@ -103,7 +103,8 @@ namespace SS
             {
                 Cell cell = nonemptyCellMap[name];
 
-                // if the cell used to contain a formula w variables, we must remove those dependencies
+                // since the cell was not empty, in case it used to contain a formula w variables,
+                // we must remove those dependees
                 graph.ReplaceDependees(name, new HashSet<string>());
 
                 cell.setContent(contents);
@@ -131,6 +132,13 @@ namespace SS
             }
 
             SetCellContentsHelper(name, text);
+
+            // if we set the cell contents to the empty string, it is now considered empty
+            // so we must remove it from the nonemptyCellMap
+            if (text == "")
+            {
+                nonemptyCellMap.Remove(name);
+            }
 
             return new HashSet<string>(GetCellsToRecalculate(name));
         }
