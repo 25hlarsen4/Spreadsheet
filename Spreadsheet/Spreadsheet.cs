@@ -1,83 +1,25 @@
-﻿//using Spreadsheet;
-using SpreadsheetUtilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using SpreadsheetUtilities;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace SS
 {
     /// <summary>
-    /// <para>
-    ///     An AbstractSpreadsheet object represents the state of a simple spreadsheet.  A 
-    ///     spreadsheet consists of an infinite number of named cells.
-    /// </para>
-    /// <para>
-    ///     A string is a valid cell name if and only if:
-    /// </para>
-    /// <list type="number">
-    ///      <item> its first character is an underscore or a letter</item>
-    ///      <item> its remaining characters (if any) are underscores and/or letters and/or digits</item>
-    /// </list>   
-    /// <para>
-    ///     Note that this is the same as the definition of valid variable from the Formula class assignment.
-    /// </para>
+    /// Author:      Hannah Larsen
+    /// Partner:     None
+    /// Date:        03-Feb-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
     /// 
-    /// <para>
-    ///     For example, "x", "_", "x2", "y_15", and "___" are all valid cell  names, but
-    ///     "25", "2x", and "&amp;" are not.  Cell names are case sensitive, so "x" and "X" are
-    ///     different cell names.
-    /// </para>
+    /// I, Hannah Larsen, certify that I wrote this code from scratch and did not copy it in part or whole from another source.
+    /// All references used in the completion of the assignment are cited in my README file.
     /// 
-    /// <para>
-    ///     A spreadsheet contains a cell corresponding to every possible cell name.  (This
-    ///     means that a spreadsheet contains an infinite number of cells.)  In addition to 
-    ///     a name, each cell has a contents and a value.  The distinction is important.
-    /// </para>
-    /// 
-    /// <para>
-    ///     The contents of a cell can be (1) a string, (2) a double, or (3) a Formula.  If the
-    ///     contents is an empty string, we say that the cell is empty.  (By analogy, the contents
-    ///     of a cell in Excel is what is displayed on the editing line when the cell is selected.)
-    /// </para>
-    /// 
-    /// <para>
-    ///     In a new spreadsheet, the contents of every cell is the empty string. Note: 
-    ///     this is by definition (it is IMPLIED, not stored).
-    /// </para>
-    /// 
-    /// <para>
-    ///     The value of a cell can be (1) a string, (2) a double, or (3) a FormulaError.  
-    ///     (By analogy, the value of an Excel cell is what is displayed in that cell's position
-    ///     in the grid.)
-    /// </para>
-    /// 
-    /// <list type="number">
-    ///   <item>If a cell's contents is a string, its value is that string.</item>
-    /// 
-    ///   <item>If a cell's contents is a double, its value is that double.</item>
-    /// 
-    ///   <item>
-    ///      If a cell's contents is a Formula, its value is either a double or a FormulaError,
-    ///      as reported by the Evaluate method of the Formula class.  The value of a Formula,
-    ///      of course, can depend on the values of variables.  The value of a variable is the 
-    ///      value of the spreadsheet cell it names (if that cell's value is a double) or 
-    ///      is undefined (otherwise).
-    ///   </item>
-    /// 
-    /// </list>
-    /// 
-    /// <para>
-    ///     Spreadsheets are never allowed to contain a combination of Formulas that establish
-    ///     a circular dependency.  A circular dependency exists when a cell depends on itself.
-    ///     For example, suppose that A1 contains B1*2, B1 contains C1*2, and C1 contains A1*2.
-    ///     A1 depends on B1, which depends on C1, which depends on A1.  That's a circular
-    ///     dependency.
-    /// </para>
+    /// File Contents:
+    /// This file contains a Spreadsheet class that provides the beginnings of the internals needed for our eventual
+    /// spreadsheet. It allows functionality such as setting and getting cell contents and keeps track of all dependencies.
+    /// See the inherited comments from the implemented AbstractSpreadsheet class for more details.
     /// </summary>
+    /// 
+    /// <inheritdoc/>
     public class Spreadsheet : AbstractSpreadsheet
     {
         /// <summary>
@@ -88,46 +30,46 @@ namespace SS
         /// </summary>
         private Dictionary<string, Cell> nonemptyCellMap;
 
-
+        /// <summary>
+        /// This DependencyGraph will keep track of the dependencies between cells in a spreadsheet.
+        /// </summary>
         private DependencyGraph graph;
 
+        /// <summary>
+        /// This creates an empty spreadsheet. An empty spreadsheet contains an infinite number of
+        /// named cells, ie. a cell corresponding to every possible cell name.
+        /// </summary>
         public Spreadsheet()
         {
             nonemptyCellMap = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
         }
 
+        /// <summary>
+        /// This is a helper method to determine if a given cell name is valid, meaning it is not null, 
+        /// and it consists of an underscore or a letter followed by 0 or more underscores and/or letters
+        /// and/or digits.
+        /// </summary>
+        /// 
+        /// <param name="name"> The name to determine the validity of. </param>
+        /// 
+        /// <exception cref="InvalidNameException"> Throws an InvalidNameExcpetion if the name found to be
+        /// invalid by the prescribed requisites. </exception>
         private static void DetermineIfNameIsInvalid(string name)
         {
-            if (name == null || !Regex.IsMatch(name, @"^[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            if (name == null || !Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z\d_]*$"))
             {
                 throw new InvalidNameException();
             }
         }
 
-        /// <summary>
-        /// Returns an Enumerable that can be used to enumerate 
-        /// the names of all the non-empty cells in the spreadsheet.
-        /// </summary>
+        /// <inheritdoc/>
         public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             return nonemptyCellMap.Keys;
         }
 
-        /// <summary>
-        ///   Returns the contents (as opposed to the value) of the named cell.
-        /// </summary>
-        /// 
-        /// <exception cref="InvalidNameException"> 
-        ///   Thrown if the name is null or invalid
-        /// </exception>
-        /// 
-        /// <param name="name">The name of the spreadsheet cell to query</param>
-        /// 
-        /// <returns>
-        ///   The return value should be either a string, a double, or a Formula.
-        ///   See the class header summary 
-        /// </returns>
+        /// <inheritdoc/>
         public override object GetCellContents(string name)
         {
             DetermineIfNameIsInvalid(name);
@@ -141,38 +83,19 @@ namespace SS
             return "";
         }
 
-        /// Every name already exists by default?
-        /// 
         /// <summary>
-        ///  Set the contents of the named cell to the given number.  
+        /// This is a helper method that is meant to be called in all SetCellContents methods. 
+        /// It sets the contents of the cell with the given name to the specified string, double, 
+        /// or Formula, making sure to keep up with any dependency changes that happen as a result.
         /// </summary>
-        /// 
-        /// <exception cref="InvalidNameException"> 
-        ///   If the name is null or invalid, throw an InvalidNameException
-        /// </exception>
-        /// 
-        /// <param name="name"> The name of the cell </param>
-        /// <param name="number"> The new contents/value </param>
-        /// 
-        /// <returns>
-        ///   <para>
-        ///      The method returns a set consisting of name plus the names of all other cells whose value depends, 
-        ///      directly or indirectly, on the named cell.
-        ///   </para>
-        /// 
-        ///   <para>
-        ///      For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
-        ///      set {A1, B1, C1} is returned.
-        ///   </para>
-        /// </returns>
-        public override ISet<string> SetCellContents(string name, double number)
+        /// <param name="name"> The name of the cell to set the contents of. </param>
+        /// <param name="contents"> The string, double, or Formula to set the cell contents to. </param>
+        private void SetCellContentsHelper(string name, object contents)
         {
-            DetermineIfNameIsInvalid(name);
-
             // if the cell was previously empty, we don't need to alter dependencies
             if (!nonemptyCellMap.ContainsKey(name))
             {
-                Cell newCell = new Cell(name, number);
+                Cell newCell = new Cell(name, contents);
                 nonemptyCellMap.Add(name, newCell);
             }
 
@@ -183,38 +106,21 @@ namespace SS
                 // if the cell used to contain a formula w variables, we must remove those dependencies
                 graph.ReplaceDependees(name, new HashSet<string>());
 
-                cell.setContent(number);
+                cell.setContent(contents);
             }
-
-            LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
-            return new HashSet<string>(dependents);
         }
 
-        /// <summary>
-        /// The contents of the named cell becomes the text.  
-        /// </summary>
-        /// 
-        /// <exception cref="ArgumentNullException"> 
-        ///   If text is null, throw an ArgumentNullException.
-        /// </exception>
-        /// 
-        /// <exception cref="InvalidNameException"> 
-        ///   If the name is null or invalid, throw an InvalidNameException
-        /// </exception>
-        /// 
-        /// <param name="name"> The name of the cell </param>
-        /// <param name="text"> The new content/value of the cell</param>
-        /// 
-        /// <returns>
-        ///   The method returns a set consisting of name plus the names of all 
-        ///   other cells whose value depends, directly or indirectly, on the 
-        ///   named cell.
-        /// 
-        ///   <para>
-        ///     For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
-        ///     set {A1, B1, C1} is returned.
-        ///   </para>
-        /// </returns>
+        /// <inheritdoc/>
+        public override ISet<string> SetCellContents(string name, double number)
+        {
+            DetermineIfNameIsInvalid(name);
+
+            SetCellContentsHelper(name, number);
+
+            return new HashSet<string>(GetCellsToRecalculate(name));
+        }
+
+        /// <inheritdoc/>
         public override ISet<string> SetCellContents(string name, string text)
         {
             DetermineIfNameIsInvalid(name);
@@ -224,59 +130,12 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
-            // if the cell was previously empty, we don't need to alter dependencies
-            if (!nonemptyCellMap.ContainsKey(name))
-            {
-                Cell newCell = new Cell(name, text);
-                nonemptyCellMap.Add(name, newCell);
-            }
+            SetCellContentsHelper(name, text);
 
-            else
-            {
-                Cell cell = nonemptyCellMap[name];
-
-                // if the cell used to contain a formula w variables, we must remove those dependencies
-                graph.ReplaceDependees(name, new HashSet<string>());
-
-                cell.setContent(text);
-            }
-
-            LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
-            return new HashSet<string>(dependents);
+            return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
-        /// <summary>
-        /// Set the contents of the named cell to the formula.  
-        /// </summary>
-        /// 
-        /// <exception cref="ArgumentNullException"> 
-        ///   If formula parameter is null, throw an ArgumentNullException.
-        /// </exception>
-        /// 
-        /// <exception cref="InvalidNameException"> 
-        ///   If the name is null or invalid, throw an InvalidNameException
-        /// </exception>
-        /// 
-        /// <exception cref="CircularException"> 
-        ///   If changing the contents of the named cell to be the formula would 
-        ///   cause a circular dependency, throw a CircularException.  
-        ///   (NOTE: No change is made to the spreadsheet.)
-        /// </exception>
-        /// 
-        /// <param name="name"> The cell name</param>
-        /// <param name="formula"> The content of the cell</param>
-        /// 
-        /// <returns>
-        ///   <para>
-        ///     The method returns a Set consisting of name plus the names of all other 
-        ///     cells whose value depends, directly or indirectly, on the named cell.
-        ///   </para>
-        ///   <para> 
-        ///     For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
-        ///     set {A1, B1, C1} is returned.
-        ///   </para>
-        /// 
-        /// </returns>
+        /// <inheritdoc/>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             DetermineIfNameIsInvalid(name);
@@ -289,105 +148,72 @@ namespace SS
             // check for cycles
             ISet<string> variables = (ISet<string>)formula.GetVariables();
             GetCellsToRecalculate(variables);
-            
+
             // now we know a CircularException was not thrown, so we can set the cell contents
+            SetCellContentsHelper(name, formula);
 
-            // if the cell was previously empty, 
-            if (!nonemptyCellMap.ContainsKey(name))
-            {
-                Cell newCell = new Cell(name, formula);
+            // update the dependees to be the variables in the new formula
+            graph.ReplaceDependees(name, variables);
 
-                // since the cell was previously empty, it previously had no dependees, now must add the new ones
-                graph.ReplaceDependees(name, variables);
-
-                nonemptyCellMap.Add(name, newCell);
-            }
-
-            else
-            {
-                Cell cell = nonemptyCellMap[name];
-
-                // if the cell used to contain a formula with variables, we must replace dependees,
-                // otherwise we must only add dependees
-                graph.ReplaceDependees(name, variables);
-
-                cell.setContent(formula);
-            }
-
-            // finally return the set of dependents
-            LinkedList<string> dependents = (LinkedList<string>)GetCellsToRecalculate(name);
-            return new HashSet<string>(dependents);
+            return new HashSet<string>(GetCellsToRecalculate(name));
         }
 
-        /// <summary>
-        /// Returns an enumeration, without duplicates, of the names of all cells whose
-        /// values depend directly on the value of the named cell. 
-        /// </summary>
-        /// 
-        /// <exception cref="ArgumentNullException"> 
-        ///   If the name is null, throw an ArgumentNullException.
-        /// </exception>
-        /// 
-        /// <exception cref="InvalidNameException"> 
-        ///   If the name is null or invalid, throw an InvalidNameException ??????????????????????????
-        /// </exception>
-        /// 
-        /// <param name="name"></param>
-        /// <returns>
-        ///   Returns an enumeration, without duplicates, of the names of all cells that contain
-        ///   formulas containing name.
-        /// 
-        ///   <para>For example, suppose that: </para>
-        ///   <list type="bullet">
-        ///      <item>A1 contains 3</item>
-        ///      <item>B1 contains the formula A1 * A1</item>
-        ///      <item>C1 contains the formula B1 + A1</item>
-        ///      <item>D1 contains the formula B1 - C1</item>
-        ///   </list>
-        /// 
-        ///   <para>The direct dependents of A1 are B1 and C1</para>
-        /// 
-        /// </returns>
-        public override IEnumerable<string> GetDirectDependents(string name)
+        /// <inheritdoc/>
+        protected override IEnumerable<string> GetDirectDependents(string name)
         {
             DetermineIfNameIsInvalid(name);
 
             return graph.GetDependents(name);
         }
 
+        /// <summary>
+        /// This private nested class allows the creation of Cell objects that have a name,
+        /// contents, and a value. The contents of a cell can be a string, a double, or a Formula.
+        /// If a cell's contents is a string, its value is that string.
+        /// If a cell's contents is a double, its value is that double.
+        /// If the contents is an empty string, the cell is considered empty.
+        /// If a cell's contents is a Formula, its value is either a double or a FormulaError,
+        /// as reported by the Evaluate method of the Formula class.  The value of a Formula,
+        /// of course, can depend on the values of variables.  The value of a variable is the 
+        /// value of the spreadsheet cell it names (if that cell's value is a double) or 
+        /// is undefined (otherwise).
+        /// </summary>
         private class Cell
         {
+            /// <summary>
+            /// This holds the name of a Cell.
+            /// </summary>
             private string name;
-            private Object content;
-            //private Object value;
 
+            /// <summary>
+            /// This holds the contents of a Cell (either a string, double, or Formula)
+            /// </summary>
+            private Object content;
+
+            /// <summary>
+            /// This creates a Cell with the input name and contents.
+            /// </summary>
+            /// <param name="name"> The name for the Cell. </param>
+            /// <param name="content"> The contents for the Cell. </param>
             public Cell(string name, Object content)
             {
                 this.name = name;
                 this.content = content;
-
-                //if (content is string || content is double)
-                //{
-                //    this.value = content;
-                //}
-
-                //else if (content is Formula)
-                //{
-                //    // what do i do here?
-                //    this.value = (Formula)content.Evaluate(null);
-                //}
-
-                //else
-                //{
-                //    // anything here?
-                //}
             }
 
+            /// <summary>
+            /// This is a getter to get the contents of this Cell object.
+            /// </summary>
+            /// <returns></returns>
             public Object getContent()
             {
                 return content;
             }
 
+            /// <summary>
+            /// This is a setter to set the contents of this Cell object to the input value.
+            /// </summary>
+            /// <param name="content"> The value to set the contents to. </param>
             public void setContent(Object content)
             {
                 this.content = content;

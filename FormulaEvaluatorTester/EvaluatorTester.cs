@@ -1,4 +1,9 @@
-﻿/// <summary>
+﻿
+using SpreadsheetUtilities;
+using System.Text.RegularExpressions;
+
+using System.Xml.Linq;
+/// <summary>
 /// Author:      Hannah Larsen
 /// Partner:     None
 /// Date:        13-Jan-2023
@@ -11,9 +16,7 @@
 /// File Contents:
 /// This file contains a console application that tests the functionality of the Evaluate function in the FormulaEvaluator
 /// project. It uses print statements to verify that a test either passed or failed.
-/// 
 /// </summary>
-
 
 /// <summary>
 /// This method tests the Evaluate method on mathematical expressions only involving the + operator, both with and without 

@@ -76,7 +76,7 @@ namespace SpreadsheetUtilities
         /// otherwise. </returns>
         private static Boolean isVariable(String token)
         {
-            if (Regex.IsMatch(token, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+            if (Regex.IsMatch(token, @"^[a-zA-Z_][a-zA-Z\d_]*$"))
             {
                 return true;
             }
@@ -592,7 +592,7 @@ namespace SpreadsheetUtilities
                 }
 
                 // if token is a variable, make sure it's normalized
-                else if (Regex.IsMatch(e.Current, @"[a-zA-Z_](?: [a-zA-Z_]|\d)*"))
+                else if (isVariable(e.Current))
                 {
                     code += this.normalizer(e.Current).GetHashCode();
                 }

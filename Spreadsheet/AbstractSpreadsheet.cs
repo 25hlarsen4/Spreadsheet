@@ -317,23 +317,31 @@ namespace SS
 
         /// <summary>
         /// A helper for the GetCellsToRecalculate method.
-        /// 
-        ///   -- You should fully comment what is going on below using XML tags as appropriate --
         /// </summary>
         private void Visit(String start, String name, ISet<String> visited, LinkedList<String> changed)
         {
+            // mark the current dependent being explored as visited
             visited.Add(name);
+
+            // this ensures that direct dependents are to be recalculated first, before any of the
+            // indirect dependents
             foreach (String n in GetDirectDependents(name))
             {
+                // if the start is dependent on itself, there is a cycle
                 if (n.Equals(start))
                 {
                     throw new CircularException();
                 }
+                // otherwise, if the current dependent has not yet been visited, call visit on said
+                // dependent to explore all ITS dependents and make sure it is not involved in any cycles
                 else if (!visited.Contains(n))
                 {
                     Visit(start, n, visited, changed);
                 }
             }
+            // at this point, name's dependents have been fully explored, so add it to the changed list.
+            // also note that by using AddFirst, the cells that must be recalculated first are ensured to
+            // be at the front of the list
             changed.AddFirst(name);
         }
 

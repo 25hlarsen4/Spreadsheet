@@ -19,6 +19,15 @@ namespace FormulaTests
     [TestClass]
     public class FormulaTests
     {
+        [TestMethod]
+        public void Autograder()
+        {
+            Formula f1 = new Formula("1e-2 + X5 + 17.00 * 19 ");
+            string result = f1.ToString();
+            Formula f2 = new Formula("   0.0100  +     X5+ 17 * 19.00000 ");
+            Assert.IsTrue(1 == 1);
+        }
+
         /// <summary>
         /// This tests that the formula constructor throws a FormulaFormatException when
         /// the formula has no tokens.

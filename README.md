@@ -5,7 +5,7 @@ StartDate:			13-Jan-2023
 Course:				CS3500, University of Utah, School of Computing
 GitHubID:			25hlarsen4
 Repo:				https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-CommitDate:			
+CommitDate:			08-Feb-2023 6:15 pm
 Solution:			Spreadsheet
 Copyright:			CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```
@@ -42,5 +42,6 @@ Note: No serious hangups arose, so my time spent working was evenly distributed 
 Assignment 3 - Refactoring the FormulaEvaluator:		Predicted hours: 12		   Actual hours: 12\
 Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
 
-Assignment 4 - Onward to a Spreadsheet:		Predicted hours: 12		   Actual hours: \
-Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
+Assignment 4 - Onward to a Spreadsheet:		Predicted hours: 12		   Actual hours: 11\
+Note: An hour was spent trying to fix a slightly off Regex expression, but other than that my time was evenly
+distributed amongst the assignment tasks.

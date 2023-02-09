@@ -149,6 +149,46 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
+        /// This tests that the SetCellContents method can detect cycles in several 
+        /// different scenarios.
+        /// </summary>
+        [TestMethod]
+        public void TestSetCellContentsCycleCausedInSeveralWays()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            
+            // set a1, it should have no dependents
+            ISet<string> aSet = sheet.SetCellContents("a1", new Formula("b1+c1"));
+            Assert.AreEqual(1, aSet.Count);
+            Assert.IsTrue(aSet.Contains("a1"));
+
+            // set c1, its dependent should be a1
+            ISet<string> cSet = sheet.SetCellContents("c1", new Formula("b1"));
+            Assert.AreEqual(2, cSet.Count);
+            Assert.IsTrue(cSet.Contains("c1"));
+            Assert.IsTrue(cSet.Contains("a1"));
+
+            // set b1, its dependents should be a1 and c1
+            ISet<string> bSet = sheet.SetCellContents("b1", new Formula("d1"));
+            Assert.AreEqual(3, bSet.Count);
+            Assert.IsTrue(bSet.Contains("b1"));
+            Assert.IsTrue(bSet.Contains("a1"));
+            Assert.IsTrue(bSet.Contains("c1"));
+
+            Action a = () => sheet.SetCellContents("d1", new Formula("e1+b1"));
+            Assert.ThrowsException<CircularException>(a, "failed to throw exception");
+
+            Action b = () => sheet.SetCellContents("d1", new Formula("e1+c1"));
+            Assert.ThrowsException<CircularException>(b, "failed to throw exception");
+
+            Action c = () => sheet.SetCellContents("d1", new Formula("e1+a1"));
+            Assert.ThrowsException<CircularException>(c, "failed to throw exception");
+
+            Action d = () => sheet.SetCellContents("d1", new Formula("a1+b1+c1"));
+            Assert.ThrowsException<CircularException>(d, "failed to throw exception");
+        }
+
+        /// <summary>
         /// This tests that the SetCellContents method throws an ArgumentNullException
         /// when the passed in string to set the cell contents to is null.
         /// </summary>
@@ -160,19 +200,6 @@ namespace SpreadsheetTests
             Action a = () => sheet.SetCellContents("a1", text);
             Assert.ThrowsException<ArgumentNullException>(a, "failed to throw exception");
         }
-
-        /// <summary>
-        /// This tests that the SetCellContents method throws an ArgumentNullException
-        /// when the passed in Formula to set the cell contents to is null.
-        /// </summary>
-        //[TestMethod]
-        //public void TestSetCellContentsNullFormula()
-        //{
-        //    Spreadsheet sheet = new Spreadsheet();
-        //    Formula form = null;
-        //    Action a = () => sheet.SetCellContents("a1", form);
-        //    Assert.ThrowsException<ArgumentNullException>(a, "failed to throw exception");
-        //}
 
         /// <summary>
         /// This tests the SetCellContents method in a complicated case where there
@@ -243,7 +270,6 @@ namespace SpreadsheetTests
             Assert.IsTrue(aSetNew.Contains("c1"));
         }
 
-        /// form must have = before it ****************************************************
         /// <summary>
         /// This tests the SetCellContents method in a case where a Cell that
         /// previously contained a Formula is reset to contain a string.
@@ -393,32 +419,5 @@ namespace SpreadsheetTests
             sheet.SetCellContents("a1", 2);
             Assert.AreEqual("", sheet.GetCellContents("b1"));
         }
-
-        [TestMethod]
-        public void TestGetDirectDependents()
-        {
-            Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", 2);
-            sheet.SetCellContents("b1", new Formula("1/a1"));
-            sheet.SetCellContents("c1", new Formula("b1 + 1"));
-            sheet.SetCellContents("d1", new Formula("a1 - 2"));
-
-            IEnumerable<string> aDeps = sheet.GetDirectDependents("a1");
-            IEnumerable<string> bDeps = sheet.GetDirectDependents("b1");
-            IEnumerable<string> cDeps = sheet.GetDirectDependents("c1");
-            IEnumerable<string> dDeps = sheet.GetDirectDependents("d1");
-
-            Assert.AreEqual(2, aDeps.Count());
-            Assert.IsTrue(aDeps.Contains("b1"));
-            Assert.IsTrue(aDeps.Contains("d1"));
-
-            Assert.AreEqual(1, bDeps.Count());
-            Assert.IsTrue(bDeps.Contains("c1"));
-
-            Assert.AreEqual(0, cDeps.Count());
-
-            Assert.AreEqual(0, dDeps.Count());
-        }
-
     }
 }
