@@ -4,7 +4,7 @@ Partner:		None
 Course:			CS3500, University of Utah, School of Computing
 GitHubID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-Date:			08-Feb-2023 6:15 pm
+Date:			09-Feb-2023 10:10 am
 Project:	  	SpreadsheetTests
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```

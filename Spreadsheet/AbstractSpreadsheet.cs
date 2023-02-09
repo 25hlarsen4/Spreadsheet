@@ -316,8 +316,18 @@ namespace SS
 
 
         /// <summary>
-        /// A helper for the GetCellsToRecalculate method.
+        /// This is a helper for the GetCellsToRecalculate method that builds up a list of
+        /// all dependents (direct and indirect) of the start cell in the order that they 
+        /// must be recalculated should the start cell be recalculated.
         /// </summary>
+        /// <param name="start"> The name of the cell to find all dependents in order of. </param>
+        /// <param name="name"> The name of the current cell being recursively explored. </param>
+        /// <param name="visited"> The set of cell names that have already been visited in the
+        /// recursion. </param>
+        /// <param name="changed"> The list of names of dependents in the order that they must be
+        /// recalculated. </param>
+        /// <exception cref="CircularException"> Throws a CircularException if a cell is involved in
+        /// a cycle. </exception>
         private void Visit(String start, String name, ISet<String> visited, LinkedList<String> changed)
         {
             // mark the current dependent being explored as visited

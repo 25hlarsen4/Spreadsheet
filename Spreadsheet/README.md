@@ -4,7 +4,7 @@ Partner:		None
 Course:			CS3500, University of Utah, School of Computing
 GitHubID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-Date:			08-Feb-2023 6:15 pm
+Date:			09-Feb-2023 10:10 am
 Project:	  	Spreadsheet
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```
@@ -14,7 +14,9 @@ Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in ac
 
 I was not able to test that SetCellContents(string name, Formula formula) throws an ArgumentNullException when
 the formula parameter is null because it instead threw a NullReferenceException since Formula is non nullable, 
-however I still checked for that case in my code since we were told to in the instructions.
+however I still checked for that case in my code since we were told to in the instructions. Furthermore, the method
+header for GetDirectDependents says to throw both an ArgumentNullException and InvalidNameException when the input
+name is null, so I just used the more precise option of the InvalidNameException.
 
 # Assignment Specific Topics:
 
