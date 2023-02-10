@@ -47,7 +47,7 @@ namespace SS
 
         /// <summary>
         /// This is a helper method to determine if a given cell name is valid, meaning it is not null, 
-        /// and it consists of an underscore or a letter followed by 0 or more underscores and/or letters
+        /// and it consists of an underscore or a letter followed by zero or more underscores and/or letters
         /// and/or digits.
         /// </summary>
         /// 
