@@ -14,7 +14,7 @@ namespace SpreadsheetTests
     /// All references used in the completion of the assignment are cited in my README file.
     /// 
     /// File Contents:
-    /// This file contains a test class for Spreadsheet and is intended to contain all SpreadsheetTests Unit Tests.
+    /// This file contains a test class for the Spreadsheet class and is intended to contain all SpreadsheetTests Unit Tests.
     /// It tests all methods in the Spreadsheet class.
     /// </summary>
     [TestClass]
