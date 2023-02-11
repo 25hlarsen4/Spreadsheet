@@ -35,8 +35,6 @@ namespace SS
         /// </summary>
         private DependencyGraph graph;
 
-        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
-
         /// <summary>
         /// This creates an empty spreadsheet. An empty spreadsheet contains an infinite number of
         /// named cells, ie. a cell corresponding to every possible cell name.
@@ -49,7 +47,7 @@ namespace SS
 
         /// <summary>
         /// This is a helper method to determine if a given cell name is valid, meaning it is not null, 
-        /// and it consists of an underscore or a letter followed by zero or more underscores and/or letters
+        /// and it consists of an underscore or a letter followed by 0 or more underscores and/or letters
         /// and/or digits.
         /// </summary>
         /// 
@@ -66,7 +64,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<String> GetNamesOfAllNonemptyCells()
+        public override IEnumerable<string> GetNamesOfAllNonemptyCells()
         {
             return nonemptyCellMap.Keys;
         }
@@ -114,7 +112,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        protected override IList<String> SetCellContents(string name, double number)
+        public override ISet<string> SetCellContents(string name, double number)
         {
             DetermineIfNameIsInvalid(name);
 
@@ -124,7 +122,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        protected override IList<String> SetCellContents(string name, string text)
+        public override ISet<string> SetCellContents(string name, string text)
         {
             DetermineIfNameIsInvalid(name);
 
@@ -146,7 +144,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        protected override IList<String> SetCellContents(string name, Formula formula)
+        public override ISet<string> SetCellContents(string name, Formula formula)
         {
             DetermineIfNameIsInvalid(name);
 
@@ -166,12 +164,6 @@ namespace SS
             graph.ReplaceDependees(name, variables);
 
             return new HashSet<string>(GetCellsToRecalculate(name));
-        }
-
-        public override IList<String> SetContentsOfCell(String name, String content)
-        {
-            LinkedList<string> list = new LinkedList<string>();
-            return (IList<String>)list;
         }
 
         /// <inheritdoc/>
