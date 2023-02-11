@@ -35,6 +35,8 @@ namespace SS
         /// </summary>
         private DependencyGraph graph;
 
+        public override bool Changed { get => throw new NotImplementedException(); protected set => throw new NotImplementedException(); }
+
         /// <summary>
         /// This creates an empty spreadsheet. An empty spreadsheet contains an infinite number of
         /// named cells, ie. a cell corresponding to every possible cell name.
@@ -64,7 +66,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        public override IEnumerable<string> GetNamesOfAllNonemptyCells()
+        public override IEnumerable<String> GetNamesOfAllNonemptyCells()
         {
             return nonemptyCellMap.Keys;
         }
@@ -112,7 +114,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        public override ISet<string> SetCellContents(string name, double number)
+        protected override IList<String> SetCellContents(string name, double number)
         {
             DetermineIfNameIsInvalid(name);
 
@@ -122,7 +124,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        public override ISet<string> SetCellContents(string name, string text)
+        protected override IList<String> SetCellContents(string name, string text)
         {
             DetermineIfNameIsInvalid(name);
 
@@ -144,7 +146,7 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        public override ISet<string> SetCellContents(string name, Formula formula)
+        protected override IList<String> SetCellContents(string name, Formula formula)
         {
             DetermineIfNameIsInvalid(name);
 
@@ -164,6 +166,12 @@ namespace SS
             graph.ReplaceDependees(name, variables);
 
             return new HashSet<string>(GetCellsToRecalculate(name));
+        }
+
+        public override IList<String> SetContentsOfCell(String name, String content)
+        {
+            LinkedList<string> list = new LinkedList<string>();
+            return (IList<String>)list;
         }
 
         /// <inheritdoc/>
