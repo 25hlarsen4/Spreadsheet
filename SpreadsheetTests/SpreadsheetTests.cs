@@ -20,6 +20,75 @@ namespace SpreadsheetTests
     [TestClass]
     public class SpreadsheetTests
     {
+        [TestMethod]
+        public void TestGetCellValueFormula()
+        {
+            //Spreadsheet sheet = new Spreadsheet(s => true, s => s, "default");
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            Assert.AreEqual(Convert.ToDouble(2), sheet.GetCellValue("a1"));
+            Assert.AreEqual(Convert.ToDouble(3), sheet.GetCellValue("b1"));
+        }
+
+        [TestMethod]
+        public void TestGetCellValueString()
+        {
+            //Spreadsheet sheet = new Spreadsheet(s => true, s => s, "default");
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "hi");
+            Assert.AreEqual("hi", sheet.GetCellValue("a1"));
+        }
+
+        [TestMethod]
+        public void TestGetCellValueNestedFormulas()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            sheet.SetContentsOfCell("c1", "=b1+1");
+            Assert.AreEqual(Convert.ToDouble(2), sheet.GetCellValue("a1"));
+            Assert.AreEqual(Convert.ToDouble(3), sheet.GetCellValue("b1"));
+            Assert.AreEqual(Convert.ToDouble(4), sheet.GetCellValue("c1"));
+        }
+
+        [TestMethod]
+        public void TestGetCellValueNestedFormulaError()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1/0");
+            sheet.SetContentsOfCell("c1", "=b1+1");
+            Assert.AreEqual(Convert.ToDouble(2), sheet.GetCellValue("a1"));
+            Assert.AreEqual(new FormulaError("A division by zero occurred."), sheet.GetCellValue("b1"));
+            Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet.GetCellValue("c1"));
+        }
+
+        [TestMethod]
+        public void TestGetCellValueWithEmptyVariable()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "=b1+1");
+            Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet.GetCellValue("a1"));
+        }
+
+        [TestMethod]
+        public void TestGetCellValueFormulaError()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "hi");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            Assert.AreEqual("hi", sheet.GetCellValue("a1"));
+            Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet.GetCellValue("b1"));
+        }
+
+        [TestMethod]
+        public void TestGetCellValueOfEmptyCell()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            Assert.AreEqual("", sheet.GetCellValue("a1"));
+        }
+
         /// <summary>
         /// This tests the SetCellContents method where the cell contents are
         /// set to a double.
@@ -28,7 +97,7 @@ namespace SpreadsheetTests
         public void TestSetNewCellContentsDouble()
         {
             Spreadsheet sheet = new Spreadsheet();
-            ISet<string> set = sheet.SetCellContents("a1", 2.2);
+            IList<string> set = sheet.SetContentsOfCell("a1", "2.2");
             Assert.IsTrue(set.Contains("a1"));
         }
 
@@ -40,7 +109,7 @@ namespace SpreadsheetTests
         public void TestSetNewCellContentsString()
         {
             Spreadsheet sheet = new Spreadsheet();
-            ISet<string> set = sheet.SetCellContents("a1", "hi");
+            IList<string> set = sheet.SetContentsOfCell("a1", "hi");
             Assert.IsTrue(set.Contains("a1"));
         }
 
@@ -53,10 +122,10 @@ namespace SpreadsheetTests
         {
             Spreadsheet sheet = new Spreadsheet();
 
-            ISet<string> aset = sheet.SetCellContents("a1", new Formula("b1+1"));
+            IList<string> aset = sheet.SetContentsOfCell("a1", "=b1+1");
             Assert.IsTrue(aset.Contains("a1"));
 
-            ISet<string> bset = sheet.SetCellContents("b1", 2);
+            IList<string> bset = sheet.SetContentsOfCell("b1", "2");
             Assert.IsTrue(bset.Contains("b1"));
             Assert.IsTrue(bset.Contains("a1"));
 
@@ -67,7 +136,7 @@ namespace SpreadsheetTests
             Assert.IsTrue(nonEmptyCells.Contains("b1"));
 
             // make b1 empty
-            ISet<string> bNewSet = sheet.SetCellContents("b1", "");
+            IList<string> bNewSet = sheet.SetContentsOfCell("b1", "");
             Assert.IsTrue(bNewSet.Contains("b1"));
             Assert.IsTrue(bNewSet.Contains("a1"));
 
@@ -85,7 +154,7 @@ namespace SpreadsheetTests
         public void TestSetNewCellContentsFormula()
         {
             Spreadsheet sheet = new Spreadsheet();
-            ISet<string> set = sheet.SetCellContents("a1", new Formula("2+2"));
+            IList<string> set = sheet.SetContentsOfCell("a1", "=2+2");
             Assert.IsTrue(set.Contains("a1"));
         }
 
@@ -97,9 +166,9 @@ namespace SpreadsheetTests
         public void TestSetSeveralNewCellContents()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", 2.2);
-            sheet.SetCellContents("b1", new Formula("a1+1"));
-            ISet<string> set = sheet.SetCellContents("a1", 2.5);
+            sheet.SetContentsOfCell("a1", "2.2");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            IList<string> set = sheet.SetContentsOfCell("a1", "2.5");
             Assert.IsTrue(set.Contains("a1"));
             Assert.IsTrue(set.Contains("b1"));
         }
@@ -112,7 +181,7 @@ namespace SpreadsheetTests
         public void TestSetCellContentsDirectCycle()
         {
             Spreadsheet sheet = new Spreadsheet();
-            Action a = () => sheet.SetCellContents("a1", new Formula("a1+1"));
+            Action a = () => sheet.SetContentsOfCell("a1", "=a1+1");
             Assert.ThrowsException<CircularException>(a, "failed to throw exception");
         }
 
@@ -124,9 +193,9 @@ namespace SpreadsheetTests
         public void TestSetCellContentsIndirectCycle()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", new Formula("b1+1"));
-            sheet.SetCellContents("b1", new Formula("c1+1"));
-            Action a = () => sheet.SetCellContents("c1", new Formula("a1+1"));
+            sheet.SetContentsOfCell("a1", "=b1+1");
+            sheet.SetContentsOfCell("b1", "=c1+1");
+            Action a = () => sheet.SetContentsOfCell("c1", "=a1+1");
             Assert.ThrowsException<CircularException>(a, "failed to throw exception");
         }
 
@@ -139,9 +208,9 @@ namespace SpreadsheetTests
         public void TestSetCellContentsComplicatedCycle()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", 2);
-            sheet.SetCellContents("b1", new Formula("a1+c1"));
-            Action a = () => sheet.SetCellContents("c1", new Formula("b1"));
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1+c1");
+            Action a = () => sheet.SetContentsOfCell("c1", "=b1");
             Assert.ThrowsException<CircularException>(a, "failed to throw exception");
         }
 
@@ -156,28 +225,28 @@ namespace SpreadsheetTests
             Spreadsheet sheet = new Spreadsheet();
 
             // set a1 to a double, it should have no dependents
-            ISet<string> aSet = sheet.SetCellContents("a1", 2.5);
+            IList<string> aSet = sheet.SetContentsOfCell("a1", "2.5");
             Assert.AreEqual(1, aSet.Count);
             Assert.IsTrue(aSet.Contains("a1"));
 
             // set b1 to a Formula, it should have no dependents
-            ISet<string> bSet = sheet.SetCellContents("b1", new Formula("a1+1"));
+            IList<string> bSet = sheet.SetContentsOfCell("b1", "=a1+1");
             Assert.AreEqual(1, bSet.Count);
             Assert.IsTrue(bSet.Contains("b1"));
 
             // set c1 to a Formula, it should have no dependents
-            ISet<string> cSet = sheet.SetCellContents("c1", new Formula("d1+1"));
+            IList<string> cSet = sheet.SetContentsOfCell("c1", "=d1+1");
             Assert.AreEqual(1, cSet.Count);
             Assert.IsTrue(cSet.Contains("c1"));
 
             // set d1 to a Formula, its dependent should be c1
-            ISet<string> dSet = sheet.SetCellContents("d1", new Formula("b1+1"));
+            IList<string> dSet = sheet.SetContentsOfCell("d1", "=b1+1");
             Assert.AreEqual(2, dSet.Count);
             Assert.IsTrue(dSet.Contains("d1"));
             Assert.IsTrue(dSet.Contains("c1"));
 
             // reset b1 to a Formula that depends on c1, therefore a cycle should be caused
-            Action a = () => sheet.SetCellContents("b1", new Formula("c1"));
+            Action a = () => sheet.SetContentsOfCell("b1", "=c1");
             Assert.ThrowsException<CircularException>(a, "failed to throw exception");
         }
 
@@ -189,49 +258,36 @@ namespace SpreadsheetTests
         public void TestSetCellContentsCycleCausedInSeveralWays()
         {
             Spreadsheet sheet = new Spreadsheet();
-            
+
             // set a1, it should have no dependents
-            ISet<string> aSet = sheet.SetCellContents("a1", new Formula("b1+c1"));
+            IList<string> aSet = sheet.SetContentsOfCell("a1", "=b1+c1");
             Assert.AreEqual(1, aSet.Count);
             Assert.IsTrue(aSet.Contains("a1"));
 
             // set c1, its dependent should be a1
-            ISet<string> cSet = sheet.SetCellContents("c1", new Formula("b1"));
+            IList<string> cSet = sheet.SetContentsOfCell("c1", "=b1");
             Assert.AreEqual(2, cSet.Count);
             Assert.IsTrue(cSet.Contains("c1"));
             Assert.IsTrue(cSet.Contains("a1"));
 
             // set b1, its dependents should be a1 and c1
-            ISet<string> bSet = sheet.SetCellContents("b1", new Formula("d1"));
+            IList<string> bSet = sheet.SetContentsOfCell("b1", "=d1");
             Assert.AreEqual(3, bSet.Count);
             Assert.IsTrue(bSet.Contains("b1"));
             Assert.IsTrue(bSet.Contains("a1"));
             Assert.IsTrue(bSet.Contains("c1"));
 
-            Action a = () => sheet.SetCellContents("d1", new Formula("e1+b1"));
+            Action a = () => sheet.SetContentsOfCell("d1", "=e1+b1");
             Assert.ThrowsException<CircularException>(a, "failed to throw exception");
 
-            Action b = () => sheet.SetCellContents("d1", new Formula("e1+c1"));
+            Action b = () => sheet.SetContentsOfCell("d1", "=e1+c1");
             Assert.ThrowsException<CircularException>(b, "failed to throw exception");
 
-            Action c = () => sheet.SetCellContents("d1", new Formula("e1+a1"));
+            Action c = () => sheet.SetContentsOfCell("d1", "=e1+a1");
             Assert.ThrowsException<CircularException>(c, "failed to throw exception");
 
-            Action d = () => sheet.SetCellContents("d1", new Formula("a1+b1+c1"));
+            Action d = () => sheet.SetContentsOfCell("d1", "=a1+b1+c1");
             Assert.ThrowsException<CircularException>(d, "failed to throw exception");
-        }
-
-        /// <summary>
-        /// This tests that the SetCellContents method throws an ArgumentNullException
-        /// when the passed in string to set the cell contents to is null.
-        /// </summary>
-        [TestMethod]
-        public void TestSetCellContentsNullText()
-        {
-            Spreadsheet sheet = new Spreadsheet();
-            string text = null;
-            Action a = () => sheet.SetCellContents("a1", text);
-            Assert.ThrowsException<ArgumentNullException>(a, "failed to throw exception");
         }
 
         /// <summary>
@@ -244,32 +300,32 @@ namespace SpreadsheetTests
             Spreadsheet sheet = new Spreadsheet();
 
             // set a1 to a double, it should have no dependents
-            ISet<string> aSet = sheet.SetCellContents("a1", 2.5);
+            IList<string> aSet = sheet.SetContentsOfCell("a1", "2.5");
             Assert.AreEqual(1, aSet.Count);
             Assert.IsTrue(aSet.Contains("a1"));
 
             // set b1 to a Formula, it should have no dependents
-            ISet<string> bSet = sheet.SetCellContents("b1", new Formula("a1+1"));
+            IList<string> bSet = sheet.SetContentsOfCell("b1", "=a1+1");
             Assert.AreEqual(1, bSet.Count);
             Assert.IsTrue(bSet.Contains("b1"));
 
             // set c1 to a Formula, it should have no dependents
-            ISet<string> cSet = sheet.SetCellContents("c1", new Formula("d1+1"));
+            IList<string> cSet = sheet.SetContentsOfCell("c1", "=d1+1");
             Assert.AreEqual(1, cSet.Count);
             Assert.IsTrue(cSet.Contains("c1"));
 
             // set d1 to a Formula, its dependent should be c1
-            ISet<string> dSet = sheet.SetCellContents("d1", new Formula("b1+1"));
+            IList<string> dSet = sheet.SetContentsOfCell("d1", "=b1+1");
             Assert.AreEqual(2, dSet.Count);
-            Assert.IsTrue(dSet.Contains("d1"));
-            Assert.IsTrue(dSet.Contains("c1"));
+            Assert.AreEqual("d1", dSet[0]);
+            Assert.AreEqual("c1", dSet[1]);
 
             // reset b1 to a double, its dependents should now be d1 and c1
-            ISet<string> bSetNew = sheet.SetCellContents("b1", 2);
+            IList<string> bSetNew = sheet.SetContentsOfCell("b1", "2");
             Assert.AreEqual(3, bSetNew.Count);
-            Assert.IsTrue(bSetNew.Contains("b1"));
-            Assert.IsTrue(bSetNew.Contains("d1"));
-            Assert.IsTrue(bSetNew.Contains("c1"));
+            Assert.AreEqual("b1", bSetNew[0]);
+            Assert.AreEqual("d1", bSetNew[1]);
+            Assert.AreEqual("c1", bSetNew[2]);
         }
 
         /// <summary>
@@ -282,22 +338,22 @@ namespace SpreadsheetTests
             Spreadsheet sheet = new Spreadsheet();
 
             // set a1 to a Formula, it should have no dependents
-            ISet<string> aSet = sheet.SetCellContents("a1", new Formula("b1+1"));
+            IList<string> aSet = sheet.SetContentsOfCell("a1", "=b1+1");
             Assert.AreEqual(1, aSet.Count);
             Assert.IsTrue(aSet.Contains("a1"));
 
             // set b1 to a double, its dependent should be a1
-            ISet<string> bSet = sheet.SetCellContents("b1", 2);
+            IList<string> bSet = sheet.SetContentsOfCell("b1", "2");
             Assert.AreEqual(2, bSet.Count);
             Assert.IsTrue(bSet.Contains("b1"));
             Assert.IsTrue(bSet.Contains("a1"));
 
             // set c1 to a Formula, it should have no dependents
-            ISet<string> cSet = sheet.SetCellContents("c1", new Formula("a1"));
+            IList<string> cSet = sheet.SetContentsOfCell("c1", "=a1");
             Assert.AreEqual(1, cSet.Count);
 
             // reset a1 to contain new Formula, its dependent should now be c1
-            ISet<string> aSetNew = sheet.SetCellContents("a1", new Formula("d1+1"));
+            IList<string> aSetNew = sheet.SetContentsOfCell("a1", "=d1+1");
             Assert.AreEqual(2, aSetNew.Count);
             Assert.IsTrue(aSetNew.Contains("a1"));
             Assert.IsTrue(aSetNew.Contains("c1"));
@@ -313,22 +369,22 @@ namespace SpreadsheetTests
             Spreadsheet sheet = new Spreadsheet();
 
             // set a1 to contain a formula, it should have no dependents
-            ISet<string> aSet = sheet.SetCellContents("a1", new Formula("b1+1"));
+            IList<string> aSet = sheet.SetContentsOfCell("a1", "=b1+1");
             Assert.AreEqual(1, aSet.Count);
             Assert.IsTrue(aSet.Contains("a1"));
 
             // set b1 to contain a double, its dependent should be a1
-            ISet<string> bSet = sheet.SetCellContents("b1", 2);
+            IList<string> bSet = sheet.SetContentsOfCell("b1", "2");
             Assert.AreEqual(2, bSet.Count);
             Assert.IsTrue(bSet.Contains("b1"));
             Assert.IsTrue(bSet.Contains("a1"));
 
             // set c1 to contain a formula, it should have no dependents
-            ISet<string> cSet = sheet.SetCellContents("c1", new Formula("a1"));
+            IList<string> cSet = sheet.SetContentsOfCell("c1", "=a1");
             Assert.AreEqual(1, cSet.Count);
 
             // reset a1 to now contain a string, its dependent should now be c1
-            ISet<string> aSetNew = sheet.SetCellContents("a1", "hi");
+            IList<string> aSetNew = sheet.SetContentsOfCell("a1", "hi");
             Assert.AreEqual(2, aSetNew.Count);
             Assert.IsTrue(aSetNew.Contains("a1"));
             Assert.IsTrue(aSetNew.Contains("c1"));
@@ -342,8 +398,16 @@ namespace SpreadsheetTests
         public void TestSetCellContentInvalidName()
         {
             Spreadsheet sheet = new Spreadsheet();
-            Action a = () => sheet.SetCellContents("1a", 2);
+            Action a = () => sheet.SetContentsOfCell("1a", "2");
             Assert.ThrowsException<InvalidNameException>(a, "failed to throw exception");
+        }
+
+        [TestMethod]
+        public void TestSetContentsOfCellInvalidFormula()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            Action a = () => sheet.SetContentsOfCell("a1", "=1++2");
+            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
         }
 
         /// <summary>
@@ -353,10 +417,10 @@ namespace SpreadsheetTests
         public void TestGetNamesOfAllNonemptyCells()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", 2);
-            sheet.SetCellContents("b1", new Formula("1/a1"));
-            sheet.SetCellContents("c1", new Formula("b1 + 1"));
-            sheet.SetCellContents("d1", new Formula("a1 - 2"));
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=1/a1");
+            sheet.SetContentsOfCell("c1", "=b1 + 1");
+            sheet.SetContentsOfCell("d1", "=a1 - 2");
 
             IEnumerable<string> names = sheet.GetNamesOfAllNonemptyCells();
             Assert.AreEqual(4, names.Count());
@@ -391,16 +455,11 @@ namespace SpreadsheetTests
             Assert.ThrowsException<InvalidNameException>(a, "failed to throw exception");
         }
 
-        /// <summary>
-        /// This tests that the GetCellContent method throws an InvalidNameException
-        /// when the given cell name is null.
-        /// </summary>
         [TestMethod]
-        public void TestGetCellContentNullName()
+        public void TestGetCellContentEmptyName()
         {
             Spreadsheet sheet = new Spreadsheet();
-            string name = null;
-            Action a = () => sheet.GetCellContents(name);
+            Action a = () => sheet.GetCellContents("");
             Assert.ThrowsException<InvalidNameException>(a, "failed to throw exception");
         }
 
@@ -412,7 +471,7 @@ namespace SpreadsheetTests
         public void TestGetCellContentDouble()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", 2.5);
+            sheet.SetContentsOfCell("a1", "2.5");
             Assert.AreEqual(2.5, sheet.GetCellContents("a1"));
         }
 
@@ -424,7 +483,7 @@ namespace SpreadsheetTests
         public void TestGetCellContentString()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", "hi");
+            sheet.SetContentsOfCell("a1", "hi");
             Assert.AreEqual("hi", sheet.GetCellContents("a1"));
         }
 
@@ -437,7 +496,7 @@ namespace SpreadsheetTests
         {
             Spreadsheet sheet = new Spreadsheet();
             Formula form = new Formula("2+2");
-            sheet.SetCellContents("a1", form);
+            sheet.SetContentsOfCell("a1", "=2+2");
             Assert.AreEqual(form, sheet.GetCellContents("a1"));
         }
 
@@ -449,7 +508,7 @@ namespace SpreadsheetTests
         public void TestGetCellContentEmptyCell()
         {
             Spreadsheet sheet = new Spreadsheet();
-            sheet.SetCellContents("a1", 2);
+            sheet.SetContentsOfCell("a1", "2");
             Assert.AreEqual("", sheet.GetCellContents("b1"));
         }
     }
