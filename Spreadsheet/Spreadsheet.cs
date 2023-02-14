@@ -1,5 +1,7 @@
 ﻿using SpreadsheetUtilities;
 using System.Text.RegularExpressions;
+using System.Transactions;
+using System.Xml;
 
 namespace SS
 {
@@ -35,14 +37,62 @@ namespace SS
         /// </summary>
         private DependencyGraph graph;
 
+        private Func<string, bool> IsValid;
+        private Func<string, string> Normalize;
+        private string Version;
+        // { get => true; protected set => new string("a"); }
+
+        public override bool Changed { get; protected set; }
+
         /// <summary>
         /// This creates an empty spreadsheet. An empty spreadsheet contains an infinite number of
         /// named cells, ie. a cell corresponding to every possible cell name.
         /// </summary>
-        public Spreadsheet()
+        public Spreadsheet() :
+            this(s => true, s => s, "default")
         {
             nonemptyCellMap = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
+            Changed = false;
+        }
+
+        /// <summary>
+        /// This creates an empty spreadsheet. An empty spreadsheet contains an infinite number of
+        /// named cells, ie. a cell corresponding to every possible cell name.
+        /// </summary>
+        //public Spreadsheet()
+        //{
+        //    nonemptyCellMap = new Dictionary<string, Cell>();
+        //    graph = new DependencyGraph();
+        //    Changed = false;
+        //    IsValid = new Func<string, bool>(s => true);
+        //    Normalize = new Func<string, string>(s => s);
+        //    Version = "default";
+        //}
+
+        /// <summary>
+        /// Constructs an abstract spreadsheet by recording its variable validity test,
+        /// its normalization method, and its version information.  
+        /// </summary>
+        /// 
+        /// <remarks>
+        ///   The variable validity test is used throughout to determine whether a string that consists of 
+        ///   one or more letters followed by one or more digits is a valid cell name.  The variable
+        ///   equality test should be used throughout to determine whether two variables are equal.
+        /// </remarks>
+        /// 
+        /// <param name="isValid">   defines what valid variables look like for the application</param>
+        /// <param name="normalize"> defines a normalization procedure to be applied to all valid variable strings</param>
+        /// <param name="version">   defines the version of the spreadsheet (should it be saved)</param>
+        public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
+            base(isValid, normalize, version)
+        {
+            IsValid= isValid;
+            Normalize= normalize;
+            Version= version;
+            nonemptyCellMap = new Dictionary<string, Cell>();
+            graph = new DependencyGraph();
+            Changed = false;
         }
 
         /// <summary>
@@ -55,9 +105,14 @@ namespace SS
         /// 
         /// <exception cref="InvalidNameException"> Throws an InvalidNameExcpetion if the name found to be
         /// invalid by the prescribed requisites. </exception>
-        private static void DetermineIfNameIsInvalid(string name)
+        private void DetermineIfNameIsInvalid(string name)
         {
-            if (name == null || !Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z\d_]*$"))
+            if (!Regex.IsMatch(name, @"^[a-zA-Z]+\d+$"))
+            {
+                throw new InvalidNameException();
+            }
+
+            if (!IsValid(name))
             {
                 throw new InvalidNameException();
             }
@@ -73,6 +128,9 @@ namespace SS
         public override object GetCellContents(string name)
         {
             DetermineIfNameIsInvalid(name);
+
+            // at this point we know the variable is valid, so normalize it
+            name = Normalize(name);
 
             if (nonemptyCellMap.ContainsKey(name))
             {
@@ -112,26 +170,19 @@ namespace SS
         }
 
         /// <inheritdoc/>
-        public override ISet<string> SetCellContents(string name, double number)
+        protected override IList<String> SetCellContents(string name, double number)
         {
-            DetermineIfNameIsInvalid(name);
-
             SetCellContentsHelper(name, number);
+            Changed = true;
 
-            return new HashSet<string>(GetCellsToRecalculate(name));
+            return new List<string>(GetCellsToRecalculate(name));
         }
 
         /// <inheritdoc/>
-        public override ISet<string> SetCellContents(string name, string text)
+        protected override IList<String> SetCellContents(string name, string text)
         {
-            DetermineIfNameIsInvalid(name);
-
-            if (text == null)
-            {
-                throw new ArgumentNullException();
-            }
-
             SetCellContentsHelper(name, text);
+            Changed = true;
 
             // if we set the cell contents to the empty string, it is now considered empty
             // so we must remove it from the nonemptyCellMap
@@ -140,30 +191,24 @@ namespace SS
                 nonemptyCellMap.Remove(name);
             }
 
-            return new HashSet<string>(GetCellsToRecalculate(name));
+            return new List<string>(GetCellsToRecalculate(name));
         }
 
         /// <inheritdoc/>
-        public override ISet<string> SetCellContents(string name, Formula formula)
+        protected override IList<String> SetCellContents(string name, Formula formula)
         {
-            DetermineIfNameIsInvalid(name);
-
-            if (formula == null)
-            {
-                throw new ArgumentNullException();
-            }
-
             // check for cycles
             ISet<string> variables = (ISet<string>)formula.GetVariables();
             GetCellsToRecalculate(variables);
 
             // now we know a CircularException was not thrown, so we can set the cell contents
             SetCellContentsHelper(name, formula);
+            Changed = true;
 
             // update the dependees to be the variables in the new formula
             graph.ReplaceDependees(name, variables);
 
-            return new HashSet<string>(GetCellsToRecalculate(name));
+            return new List<string>(GetCellsToRecalculate(name));
         }
 
         /// <inheritdoc/>
@@ -171,7 +216,225 @@ namespace SS
         {
             DetermineIfNameIsInvalid(name);
 
+            // at this point we know the variable is valid, so normalize it
+            name = Normalize(name);
+
             return graph.GetDependents(name);
+        }
+
+        /// <summary>
+        ///   <para>Sets the contents of the named cell to the appropriate value. </para>
+        ///   <para>
+        ///       First, if the content parses as a double, the contents of the named
+        ///       cell becomes that double.
+        ///   </para>
+        ///
+        ///   <para>
+        ///       Otherwise, if content begins with the character '=', an attempt is made
+        ///       to parse the remainder of content into a Formula.  
+        ///       There are then three possible outcomes:
+        ///   </para>
+        ///
+        ///   <list type="number">
+        ///       <item>
+        ///           If the remainder of content cannot be parsed into a Formula, a 
+        ///           SpreadsheetUtilities.FormulaFormatException is thrown.
+        ///       </item>
+        /// 
+        ///       <item>
+        ///           If changing the contents of the named cell to be f
+        ///           would cause a circular dependency, a CircularException is thrown,
+        ///           and no change is made to the spreadsheet.
+        ///       </item>
+        ///
+        ///       <item>
+        ///           Otherwise, the contents of the named cell becomes f.
+        ///       </item>
+        ///   </list>
+        ///
+        ///   <para>
+        ///       Finally, if the content is a string that is not a double and does not
+        ///       begin with an "=" (equal sign), save the content as a string.
+        ///   </para>
+        /// </summary>
+        ///
+        /// <exception cref="InvalidNameException"> 
+        ///   If the name parameter is null or invalid, throw an InvalidNameException
+        /// </exception>
+        /// 
+        /// <exception cref="SpreadsheetUtilities.FormulaFormatException"> 
+        ///   If the content is "=XYZ" where XYZ is an invalid formula, throw a FormulaFormatException.
+        /// </exception>
+        /// 
+        /// <exception cref="CircularException"> 
+        ///   If changing the contents of the named cell to be the formula would 
+        ///   cause a circular dependency, throw a CircularException.  
+        ///   (NOTE: No change is made to the spreadsheet.)
+        /// </exception>
+        /// 
+        /// <param name="name"> The cell name that is being changed</param>
+        /// <param name="content"> The new content of the cell</param>
+        /// 
+        /// <returns>
+        ///       <para>
+        ///           This method returns a list consisting of the passed in cell name,
+        ///           followed by the names of all other cells whose value depends, directly
+        ///           or indirectly, on the named cell. The order of the list MUST BE any
+        ///           order such that if cells are re-evaluated in that order, their dependencies 
+        ///           are satisfied by the time they are evaluated.
+        ///       </para>
+        ///
+        ///       <para>
+        ///           For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
+        ///           list {A1, B1, C1} is returned.  If the cells are then evaluate din the order:
+        ///           A1, then B1, then C1, the integrity of the Spreadsheet is maintained.
+        ///       </para>
+        /// </returns>
+        public override IList<string> SetContentsOfCell(string name, string content)
+        {
+            DetermineIfNameIsInvalid(name);
+
+            // at this point we know the variable is valid, so normalize it
+            name = Normalize(name);
+
+            if (Double.TryParse(content, out double result))
+            {
+                return SetCellContents(name, result);
+            }
+
+            // what if there's a space before the =???
+            else if (content.Length > 0 && content[0] == '=')
+            {
+                Formula form = new Formula(content.Substring(1), Normalize, IsValid);
+                return SetCellContents(name, form);
+            }
+
+            else
+            {
+                return SetCellContents(name, content);
+            }
+        }
+
+        public override string GetSavedVersion(string filename)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Writes the contents of this spreadsheet to the named file using an XML format.
+        /// The XML elements should be structured as follows:
+        /// 
+        /// <spreadsheet version="version information goes here">
+        /// 
+        /// <cell>
+        /// <name>cell name goes here</name>
+        /// <contents>cell contents goes here</contents>    
+        /// </cell>
+        /// 
+        /// </spreadsheet>
+        /// 
+        /// There should be one cell element for each non-empty cell in the spreadsheet.  
+        /// If the cell contains a string, it should be written as the contents.  
+        /// If the cell contains a double d, d.ToString() should be written as the contents.  
+        /// If the cell contains a Formula f, f.ToString() with "=" prepended should be written as the contents.
+        /// 
+        /// If there are any problems opening, writing, or closing the file, the method should throw a
+        /// SpreadsheetReadWriteException with an explanatory message.
+        /// </summary>
+        public override void Save(string filename)
+        {
+            // REMEMBER TO DEAL WITH EXCEPTIONS
+
+            using (XmlWriter writer = XmlWriter.Create(filename))
+            {
+                writer.WriteStartElement("spreadsheet");
+
+                foreach (string name in this.GetNamesOfAllNonemptyCells())
+                {
+                    writer.WriteStartElement("cell");
+                    writer.WriteElementString("name", name);
+
+                    object content = GetCellContents(name);
+                    if (content is string)
+                    {
+                        writer.WriteElementString("contents", name);
+                    }
+                    else if (content is double)
+                    {
+                        writer.WriteElementString("contents", content.ToString());
+                    }
+                    // otherwise it's a Formula
+                    else
+                    {
+                        string formString = content.ToString();
+                        string withEquals = "=" + formString;
+                        writer.WriteElementString("contents", withEquals);
+                    }
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteEndElement(); 
+            }
+        }
+
+        public override object GetCellValue(string name)
+        {
+            // check for validity
+            
+            if (!nonemptyCellMap.ContainsKey(name))
+            {
+                return "";
+            }
+
+            Cell cell = nonemptyCellMap[name];
+
+            if (cell.getContent() is string || cell.getContent() is double)
+            {
+                return cell.getContent();
+            }
+
+            // otherwise it's a Formula
+            else
+            {
+                Formula form = (Formula)cell.getContent();
+                return form.Evaluate(LookUp);
+            }
+        }
+
+        private double LookUp(string name)
+        {
+            if (!nonemptyCellMap.ContainsKey(name))
+            {
+                throw new ArgumentException();
+            }
+
+            Cell cell = nonemptyCellMap[name];
+
+            if (cell.getContent() is string)
+            {
+                throw new ArgumentException();
+            }
+
+            else if (cell.getContent() is double)
+            {
+                return (double)cell.getContent();
+            }
+
+            // otherwise it's a Formula
+            else
+            {
+                Formula form = (Formula)cell.getContent();
+                object evaluation = form.Evaluate(LookUp);
+
+                if (evaluation is FormulaError)
+                {
+                    throw new ArgumentException();
+                }
+                else
+                {
+                    return (double)evaluation;
+                }
+            }
         }
 
         /// <summary>
