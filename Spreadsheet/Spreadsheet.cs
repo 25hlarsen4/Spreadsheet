@@ -96,6 +96,81 @@ namespace SS
             Changed = false;
         }
 
+        public Spreadsheet(string filepath, Func<string, bool> isValid, Func<string, string> normalize, string version) :
+            base(isValid, normalize, version)
+        {
+            IsValid = isValid;
+            Normalize = normalize;
+            Version = version;
+            //this.filepath = filepath;
+            Changed = false;
+            nonemptyCellMap = new Dictionary<string, Cell>();
+            graph = new DependencyGraph();
+
+            using (XmlReader reader = XmlReader.Create(filepath))
+            {
+                string? name = null;
+                string? contents = null;
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement())
+                    {
+                        //string? name = null;
+                        //string? contents = null;
+                        switch (reader.Name)
+                        {
+                            case "spreadsheet":
+                                this.Version = reader["version"];
+                                break;
+                            case "cell":
+                                break;
+                            case "name":
+                                reader.Read();
+                                name = reader.Value;
+                                // name = reader.ReadContentAsString(); ???????
+                                break;
+                            case "contents":
+                                reader.Read();
+                                contents = reader.Value;
+                                //contents = reader.ReadString();
+                                break;
+                        }
+                        
+                    }
+                    if (name != null && contents != null)
+                    {
+                        this.SetContentsOfCell(name, contents);
+                        name = null;
+                        contents = null;
+                    }
+                }
+            }
+
+            //using (XmlReader reader = XmlReader.Create(filepath))
+            //{
+            //    while (reader.Read())
+            //    {
+            //        if (reader.IsStartElement())
+            //        {
+            //            string name = "";
+            //            string contents = "";
+            //            switch (reader.Name)
+            //            {
+            //                case "name":
+            //                    name = reader.ReadString();
+            //                    // name = reader.ReadContentAsString(); ???????
+            //                    break;
+            //                case "contents":
+            //                    contents = reader.ReadString();
+            //                    break;
+            //            }
+
+            //            this.SetContentsOfCell(name, contents);
+            //        }
+            //    }
+            //}
+        }
+
         /// <summary>
         /// This is a helper method to determine if a given cell name is valid, meaning it is not null, 
         /// and it consists of an underscore or a letter followed by 0 or more underscores and/or letters
