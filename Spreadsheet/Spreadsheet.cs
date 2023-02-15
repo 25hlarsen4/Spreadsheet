@@ -108,12 +108,12 @@ namespace SS
         /// invalid by the prescribed requisites. </exception>
         private void DetermineIfNameIsInvalid(string name)
         {
-            if (!Regex.IsMatch(name, @"^[a-zA-Z]+\d+$"))
+            if (!Regex.IsMatch(Normalize(name), @"^[a-zA-Z]+\d+$"))
             {
                 throw new InvalidNameException();
             }
 
-            if (!IsValid(name))
+            if (!IsValid(Normalize(name)))
             {
                 throw new InvalidNameException();
             }
@@ -204,7 +204,27 @@ namespace SS
         {
             // check for cycles
             ISet<string> variables = (ISet<string>)formula.GetVariables();
-            GetCellsToRecalculate(variables);
+            foreach (string variable in variables)
+            {
+                graph.AddDependency(variable, name);
+            }
+
+            try
+            {
+                GetCellsToRecalculate(variables);
+            } catch (CircularException)
+            {
+                foreach (string variable in variables)
+                {
+                    graph.RemoveDependency(variable, name);
+                }
+                throw new CircularException();
+            }
+
+            foreach (string variable in variables)
+            {
+                graph.RemoveDependency(variable, name);
+            }
 
             // now we know a CircularException was not thrown, so we can set the cell contents
             SetCellContentsHelper(name, formula);
@@ -215,8 +235,7 @@ namespace SS
             // update the dependees to be the variables in the new formula
             graph.ReplaceDependees(name, variables);
 
-            List<string> deps = new List<string>(GetCellsToRecalculate(name));
-            return deps;
+            return new List<string>(GetCellsToRecalculate(name));
         }
 
         /// <inheritdoc/>
@@ -387,7 +406,9 @@ namespace SS
 
             using (XmlWriter writer = XmlWriter.Create(filename))
             {
+                writer.WriteStartDocument();
                 writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", this.Version);
 
                 foreach (string name in this.GetNamesOfAllNonemptyCells())
                 {
@@ -414,6 +435,7 @@ namespace SS
                 }
 
                 writer.WriteEndElement();
+                writer.WriteEndDocument();
             }
         }
 
@@ -427,18 +449,19 @@ namespace SS
             }
 
             Cell cell = nonemptyCellMap[name];
+            return cell.getValue();
 
-            if (cell.getContent() is string || cell.getContent() is double)
-            {
-                return cell.getContent();
-            }
+            //if (cell.getContent() is string || cell.getContent() is double)
+            //{
+            //    return cell.getContent();
+            //}
 
-            // otherwise it's a Formula
-            else
-            {
-                Formula form = (Formula)cell.getContent();
-                return form.Evaluate(LookUp);
-            }
+            //// otherwise it's a Formula
+            //else
+            //{
+            //    Formula form = (Formula)cell.getContent();
+            //    return form.Evaluate(LookUp);
+            //}
         }
 
         private double LookUp(string name)
