@@ -155,7 +155,31 @@ namespace SS
 
             // check for cycles
             ISet<string> variables = (ISet<string>)formula.GetVariables();
-            GetCellsToRecalculate(variables);
+            foreach (string variable in variables)
+            {
+                graph.AddDependency(variable, name);
+            }
+
+            try
+            {
+                foreach (string variable in variables)
+                {
+                    GetCellsToRecalculate(variable);
+                }
+            }
+            catch (CircularException)
+            {
+                foreach (string variable in variables)
+                {
+                    graph.RemoveDependency(variable, name);
+                }
+                throw new CircularException();
+            }
+
+            foreach (string variable in variables)
+            {
+                graph.RemoveDependency(variable, name);
+            }
 
             // now we know a CircularException was not thrown, so we can set the cell contents
             SetCellContentsHelper(name, formula);
