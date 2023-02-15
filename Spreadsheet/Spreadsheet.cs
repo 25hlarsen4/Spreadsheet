@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Transactions;
 using System.Xml;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SS
 {
@@ -87,9 +88,9 @@ namespace SS
         public Spreadsheet(Func<string, bool> isValid, Func<string, string> normalize, string version) :
             base(isValid, normalize, version)
         {
-            IsValid= isValid;
-            Normalize= normalize;
-            Version= version;
+            IsValid = isValid;
+            Normalize = normalize;
+            Version = version;
             nonemptyCellMap = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
             Changed = false;
@@ -174,6 +175,8 @@ namespace SS
         {
             SetCellContentsHelper(name, number);
             Changed = true;
+            Cell cell = nonemptyCellMap[name];
+            cell.setValue(number);
 
             return new List<string>(GetCellsToRecalculate(name));
         }
@@ -183,6 +186,8 @@ namespace SS
         {
             SetCellContentsHelper(name, text);
             Changed = true;
+            Cell cell = nonemptyCellMap[name];
+            cell.setValue(text);
 
             // if we set the cell contents to the empty string, it is now considered empty
             // so we must remove it from the nonemptyCellMap
@@ -204,11 +209,14 @@ namespace SS
             // now we know a CircularException was not thrown, so we can set the cell contents
             SetCellContentsHelper(name, formula);
             Changed = true;
+            Cell cell = nonemptyCellMap[name];
+            cell.setValue(formula.Evaluate(LookUp));
 
             // update the dependees to be the variables in the new formula
             graph.ReplaceDependees(name, variables);
 
-            return new List<string>(GetCellsToRecalculate(name));
+            List<string> deps = new List<string>(GetCellsToRecalculate(name));
+            return deps;
         }
 
         /// <inheritdoc/>
@@ -297,21 +305,53 @@ namespace SS
             // at this point we know the variable is valid, so normalize it
             name = Normalize(name);
 
+            //IList<string> names;
+
             if (Double.TryParse(content, out double result))
             {
-                return SetCellContents(name, result);
+                //names = new List<string>(SetCellContents(name, result));
+                //names = SetCellContents(name, result);
+                List<string> names = new List<string>(SetCellContents(name, result));
+                RecalculateCellValues(names.GetRange(1, names.Count - 1));
+                return names;
             }
 
             // what if there's a space before the =???
             else if (content.Length > 0 && content[0] == '=')
             {
                 Formula form = new Formula(content.Substring(1), Normalize, IsValid);
-                return SetCellContents(name, form);
+                //names = new List<string>(SetCellContents(name, form));
+                //names = SetCellContents(name, form);
+                List<string> names = new List<string>(SetCellContents(name, form));
+                RecalculateCellValues(names.GetRange(1, names.Count - 1));
+                return names;
             }
 
             else
             {
-                return SetCellContents(name, content);
+                //names = new List<string>(SetCellContents(name, content));
+                //names = SetCellContents(name, content);
+                List<string> names = new List<string>(SetCellContents(name, content));
+                RecalculateCellValues(names.GetRange(1, names.Count - 1));
+                return names;
+            }
+
+            //RecalculateCellValues(names);
+            //return names;
+        }
+
+        private void RecalculateCellValues(IList<string> names)
+        {
+            // the first cell's value was already reset
+            //names.RemoveAt(0);
+            foreach (string name in names)
+            {
+                // do all of these have to hold Formulas since they're all dependents?
+                // also since they hold Formulas, they're not empty, so i think we know they're in the map
+                Cell cell = nonemptyCellMap[name];
+                Formula form = (Formula)cell.getContent();
+                object val = form.Evaluate(LookUp);
+                cell.setValue(val);
             }
         }
 
@@ -373,14 +413,14 @@ namespace SS
                     writer.WriteEndElement();
                 }
 
-                writer.WriteEndElement(); 
+                writer.WriteEndElement();
             }
         }
 
         public override object GetCellValue(string name)
         {
             // check for validity
-            
+
             if (!nonemptyCellMap.ContainsKey(name))
             {
                 return "";
@@ -403,6 +443,8 @@ namespace SS
 
         private double LookUp(string name)
         {
+            // is name already valid and normalized???
+
             if (!nonemptyCellMap.ContainsKey(name))
             {
                 throw new ArgumentException();
@@ -461,6 +503,8 @@ namespace SS
             /// </summary>
             private Object content;
 
+            private object value = "";
+
             /// <summary>
             /// This creates a Cell with the input name and contents.
             /// </summary>
@@ -488,6 +532,16 @@ namespace SS
             public void setContent(Object content)
             {
                 this.content = content;
+            }
+
+            public object getValue()
+            {
+                return value;
+            }
+
+            public void setValue(object value)
+            {
+                this.value = value;
             }
         }
     }
