@@ -20,19 +20,148 @@ namespace SpreadsheetTests
     [TestClass]
     public class SpreadsheetTests
     {
+        /// <summary>
+        /// This tests the save method and the 4-argument spreadsheet constructor 
+        /// that constructs a spreadsheet based off an input xml file.
+        /// </summary>
         [TestMethod]
-        public void TestSave()
+        public void TestSaveAndLoadSpreadsheet()
         {
             Spreadsheet sheet = new Spreadsheet();
             sheet.SetContentsOfCell("a1", "2");
             sheet.SetContentsOfCell("b1", "=a1+1");
+            sheet.SetContentsOfCell("c1", "hi");
+            Assert.IsTrue(sheet.Changed);
             sheet.Save("save.txt");
+            Assert.IsFalse(sheet.Changed);
 
             Spreadsheet sheet2 = new Spreadsheet("save.txt", s => true, s => s, "default");
             Assert.AreEqual(Convert.ToDouble(2), sheet2.GetCellValue("a1"));
             Assert.AreEqual(Convert.ToDouble(3), sheet2.GetCellValue("b1"));
+            Assert.AreEqual("hi", sheet2.GetCellContents("c1"));
         }
 
+        /// <summary>
+        /// This also tests the save method and the 4-argument spreadsheet constructor 
+        /// that constructs a spreadsheet based off an input xml file, where one 
+        /// of the cell values in the newly constructed spreadsheet is a FormulaError
+        /// </summary>
+        [TestMethod]
+        public void TestSaveAndLoadSpreadsheetWithFormulaError()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=c1+1");
+            sheet.SetContentsOfCell("c1", "hi");
+            sheet.Save("save5.txt");
+
+            Spreadsheet sheet2 = new Spreadsheet("save5.txt", s => true, s => s, "default");
+            Assert.AreEqual(Convert.ToDouble(2), sheet2.GetCellValue("a1"));
+            Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet2.GetCellValue("b1"));
+            Assert.AreEqual("hi", sheet2.GetCellValue("c1"));
+        }
+
+        /// <summary>
+        /// This tests the save method and the 4-argument spreadsheet constructor 
+        /// that constructs a spreadsheet based off an input xml file in a complicated
+        /// case where one of the cells has been reset.
+        /// </summary>
+        [TestMethod]
+        public void TestComplicatedSaveAndLoadSpreadsheet()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=c1+1");
+            sheet.SetContentsOfCell("c1", "hi");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            sheet.Save("save6.txt");
+
+            Spreadsheet sheet2 = new Spreadsheet("save6.txt", s => true, s => s, "default");
+            Assert.AreEqual(Convert.ToDouble(2), sheet2.GetCellValue("a1"));
+            Assert.AreEqual(Convert.ToDouble(3), sheet2.GetCellValue("b1"));
+            Assert.AreEqual("hi", sheet2.GetCellValue("c1"));
+        }
+
+        /// <summary>
+        /// This tests that the 4-argument spreadsheet constructor throws a 
+        /// SpreadsheetReadWriteException when a nonexistent xml file is passed in.
+        /// </summary>
+        [TestMethod]
+        public void TestLoadSpreadsheetFileNotFound()
+        {
+            Action a = () => new Spreadsheet("nonexistent.txt", s => true, s => s, "default");
+            Assert.ThrowsException<SpreadsheetReadWriteException> (a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests that the 4-argument spreadsheet constructor throws a 
+        /// SpreadsheetReadWriteException when during the construction, an 
+        /// invalid name is encountered.
+        /// </summary>
+        [TestMethod]
+        public void TestLoadSpreadsheetInvalidName()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            sheet.SetContentsOfCell("c1", "hi");
+            sheet.Save("save4.txt");
+
+            Action a = () => new Spreadsheet("save4.txt", s => false, s => s, "default");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests that the 4-argument spreadsheet constructor throws a 
+        /// SpreadsheetReadWriteException if the version passed to the constructor
+        /// and the version in the xml file do not match.
+        /// </summary>
+        [TestMethod]
+        public void TestLoadSpreadsheetVersionsDontMatch()
+        { 
+            // this spreadsheet's version should be "default"
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            sheet.Save("save2.txt");
+
+            // "default" and "1" don't match, so a SpreadsheetReadWriteException should be thrown
+            Action a = () => new Spreadsheet("save2.txt", s => true, s => s, "1");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests the GetSavedVersion method in a simple case.
+        /// </summary>
+        [TestMethod]
+        public void TestGetSavedVersion()
+        {
+            // this spreadsheet's version should be "default"
+            Spreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("a1", "2");
+            sheet.SetContentsOfCell("b1", "=a1+1");
+            sheet.Save("save3.txt");
+
+            Assert.AreEqual("default", sheet.GetSavedVersion("save3.txt"));
+        }
+
+        /// <summary>
+        /// This tests that the GetSavedVersion method throws a 
+        /// SpreadsheetReadWriteException if the passed in xml file does not exist.
+        /// </summary>
+        [TestMethod]
+        public void TestGetSavedVersionNonExistentFile()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+
+            Action a = () => sheet.GetSavedVersion("nonexistent.txt");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests the GetCellValue method in the cases where the contents
+        /// are a double and a Formula.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueFormula()
         {
@@ -44,6 +173,10 @@ namespace SpreadsheetTests
             Assert.AreEqual(Convert.ToDouble(3), sheet.GetCellValue("b1"));
         }
 
+        /// <summary>
+        /// This tests the GetCellValue method in the cases where the contents
+        /// is a string.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueString()
         {
@@ -53,6 +186,10 @@ namespace SpreadsheetTests
             Assert.AreEqual("hi", sheet.GetCellValue("a1"));
         }
 
+        /// <summary>
+        /// This tests the GetCellValue method in the case where there are nested
+        /// formulas.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueNestedFormulas()
         {
@@ -65,6 +202,10 @@ namespace SpreadsheetTests
             Assert.AreEqual(Convert.ToDouble(4), sheet.GetCellValue("c1"));
         }
 
+        /// <summary>
+        /// This tests the GetCellValue method in the case where there are nested
+        /// formulas and several evaluate to FormulaErrors.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueNestedFormulaError()
         {
@@ -77,6 +218,10 @@ namespace SpreadsheetTests
             Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet.GetCellValue("c1"));
         }
 
+        /// <summary>
+        /// This tests the GetCellValue method in the case where the lookup
+        /// delegate throws.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueWithEmptyVariable()
         {
@@ -85,6 +230,10 @@ namespace SpreadsheetTests
             Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet.GetCellValue("a1"));
         }
 
+        /// <summary>
+        /// This tests the GetCellValue method in the case where one value
+        /// is a Formula Error.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueFormulaError()
         {
@@ -95,6 +244,10 @@ namespace SpreadsheetTests
             Assert.AreEqual(new FormulaError("An undefined variable was encountered."), sheet.GetCellValue("b1"));
         }
 
+        /// <summary>
+        /// This tests that the GetCellValue method returns an empty string
+        /// when called on an empty cell.
+        /// </summary>
         [TestMethod]
         public void TestGetCellValueOfEmptyCell()
         {
@@ -195,6 +348,18 @@ namespace SpreadsheetTests
             Assert.IsTrue(set.Contains("b1"));
             Assert.AreEqual(2.5, sheet.GetCellValue("a1"));
             Assert.AreEqual(3.5, sheet.GetCellValue("b1"));
+        }
+
+        /// <summary>
+        /// This tests that the SetContentsOfCell method throws an 
+        /// InvalidNameException when it encounters an invalid name.
+        /// </summary>
+        [TestMethod]
+        public void TestSetCellContentsInvalidNameByValidator()
+        {
+            Spreadsheet sheet = new Spreadsheet(s => false, s => s, "default");
+            Action a = () => sheet.SetContentsOfCell("a1", "2.2");
+            Assert.ThrowsException<InvalidNameException>(a, "failed to throw exception");
         }
 
         /// <summary>
@@ -432,6 +597,10 @@ namespace SpreadsheetTests
             Assert.ThrowsException<InvalidNameException>(a, "failed to throw exception");
         }
 
+        /// <summary>
+        /// This tests that the SetContentsOfCell method throws a FormulaFormatException
+        /// when an invalid formula is encountered.
+        /// </summary>
         [TestMethod]
         public void TestSetContentsOfCellInvalidFormula()
         {
@@ -485,6 +654,10 @@ namespace SpreadsheetTests
             Assert.ThrowsException<InvalidNameException>(a, "failed to throw exception");
         }
 
+        /// <summary>
+        /// This tests that the GetCellContentsMethod throws an InvalidNameException 
+        /// when called on an empty string.
+        /// </summary>
         [TestMethod]
         public void TestGetCellContentEmptyName()
         {
