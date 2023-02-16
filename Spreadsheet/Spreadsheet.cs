@@ -101,50 +101,78 @@ namespace SS
         {
             IsValid = isValid;
             Normalize = normalize;
-            Version = version;
-            //this.filepath = filepath;
+            //Version = version;
             Changed = false;
             nonemptyCellMap = new Dictionary<string, Cell>();
             graph = new DependencyGraph();
 
-            using (XmlReader reader = XmlReader.Create(filepath))
+            try
             {
-                string? name = null;
-                string? contents = null;
-                while (reader.Read())
+                using (XmlReader reader = XmlReader.Create(filepath))
                 {
-                    if (reader.IsStartElement())
+                    string? name = null;
+                    string? contents = null;
+                    while (reader.Read())
                     {
-                        //string? name = null;
-                        //string? contents = null;
-                        switch (reader.Name)
+                        if (reader.IsStartElement())
                         {
-                            case "spreadsheet":
-                                this.Version = reader["version"];
-                                break;
-                            case "cell":
-                                break;
-                            case "name":
-                                reader.Read();
-                                name = reader.Value;
-                                // name = reader.ReadContentAsString(); ???????
-                                break;
-                            case "contents":
-                                reader.Read();
-                                contents = reader.Value;
-                                //contents = reader.ReadString();
-                                break;
+                            //string? name = null;
+                            //string? contents = null;
+                            switch (reader.Name)
+                            {
+                                case "spreadsheet":
+                                    string vers = reader["version"];
+                                    if (vers != version)
+                                    {
+                                        throw new SpreadsheetReadWriteException("non-matching versions");
+                                    }
+                                    this.Version = vers;
+                                    break;
+                                case "cell":
+                                    break;
+                                case "name":
+                                    reader.Read();
+                                    name = reader.Value;
+                                    // name = reader.ReadContentAsString(); ???????
+                                    break;
+                                case "contents":
+                                    reader.Read();
+                                    contents = reader.Value;
+                                    //contents = reader.ReadString();
+                                    break;
+                            }
+
                         }
-                        
-                    }
-                    if (name != null && contents != null)
-                    {
-                        this.SetContentsOfCell(name, contents);
-                        name = null;
-                        contents = null;
+                        if (name != null && contents != null)
+                        {
+                            this.SetContentsOfCell(name, contents);
+                            name = null;
+                            contents = null;
+                        }
                     }
                 }
+            } 
+            catch (IOException)
+            {
+                throw new SpreadsheetReadWriteException("file error");
+            } catch (InvalidNameException)
+            {
+                throw new SpreadsheetReadWriteException("invalid name");
+            } catch (CircularException)
+            {
+                throw new SpreadsheetReadWriteException("circular dependency");
+            } catch (SpreadsheetReadWriteException)
+            {
+                throw new SpreadsheetReadWriteException("non-matching versions");
+            } catch (FormulaFormatException)
+            {
+                throw new SpreadsheetReadWriteException("syntactically incorrect formula");
+            } catch
+            {
+                throw new SpreadsheetReadWriteException("other issues");
             }
+
+            
 
             //using (XmlReader reader = XmlReader.Create(filepath))
             //{
@@ -286,8 +314,12 @@ namespace SS
 
             try
             {
-                GetCellsToRecalculate(variables);
-            } catch (CircularException)
+                foreach (string variable in variables)
+                {
+                    GetCellsToRecalculate(variable);
+                }
+            }
+            catch (CircularException)
             {
                 foreach (string variable in variables)
                 {
@@ -436,8 +468,6 @@ namespace SS
 
         private void RecalculateCellValues(IList<string> names)
         {
-            // the first cell's value was already reset
-            //names.RemoveAt(0);
             foreach (string name in names)
             {
                 // do all of these have to hold Formulas since they're all dependents?
@@ -451,7 +481,48 @@ namespace SS
 
         public override string GetSavedVersion(string filename)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using (XmlReader reader = XmlReader.Create(filename))
+                {
+                    string? vers = null;
+                    while (reader.Read())
+                    {
+                        if (reader.IsStartElement())
+                        {
+                            switch (reader.Name)
+                            {
+                                case "spreadsheet":
+                                    vers = reader["version"];
+                                    return vers;
+                                case "cell":
+                                    break;
+                                case "name":
+                                    break;
+                                case "contents":
+                                    break;
+                            }
+                        }
+                    }
+                    if (vers == null)
+                    {
+                        throw new SpreadsheetReadWriteException("version not found");
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                throw new SpreadsheetReadWriteException("file error");
+            }
+            catch (SpreadsheetReadWriteException)
+            {
+                throw new SpreadsheetReadWriteException("version not found");
+            } catch
+            {
+                throw new SpreadsheetReadWriteException("other issues");
+            }
+
+            return "version not found";
         }
 
         /// <summary>
@@ -477,46 +548,55 @@ namespace SS
         /// </summary>
         public override void Save(string filename)
         {
-            // REMEMBER TO DEAL WITH EXCEPTIONS
-
-            using (XmlWriter writer = XmlWriter.Create(filename))
+            try
             {
-                writer.WriteStartDocument();
-                writer.WriteStartElement("spreadsheet");
-                writer.WriteAttributeString("version", this.Version);
-
-                foreach (string name in this.GetNamesOfAllNonemptyCells())
+                using (XmlWriter writer = XmlWriter.Create(filename))
                 {
-                    writer.WriteStartElement("cell");
-                    writer.WriteElementString("name", name);
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("spreadsheet");
+                    writer.WriteAttributeString("version", this.Version);
 
-                    object content = GetCellContents(name);
-                    if (content is string)
+                    foreach (string name in this.GetNamesOfAllNonemptyCells())
                     {
-                        writer.WriteElementString("contents", name);
+                        writer.WriteStartElement("cell");
+                        writer.WriteElementString("name", name);
+
+                        object content = GetCellContents(name);
+                        if (content is string)
+                        {
+                            writer.WriteElementString("contents", (string)content);
+                        }
+                        else if (content is double)
+                        {
+                            writer.WriteElementString("contents", content.ToString());
+                        }
+                        // otherwise it's a Formula
+                        else
+                        {
+                            string formString = content.ToString();
+                            string withEquals = "=" + formString;
+                            writer.WriteElementString("contents", withEquals);
+                        }
+                        writer.WriteEndElement();
                     }
-                    else if (content is double)
-                    {
-                        writer.WriteElementString("contents", content.ToString());
-                    }
-                    // otherwise it's a Formula
-                    else
-                    {
-                        string formString = content.ToString();
-                        string withEquals = "=" + formString;
-                        writer.WriteElementString("contents", withEquals);
-                    }
+
                     writer.WriteEndElement();
+                    writer.WriteEndDocument();
                 }
-
-                writer.WriteEndElement();
-                writer.WriteEndDocument();
             }
+            catch (IOException)
+            {
+                throw new SpreadsheetReadWriteException("file error");
+            } catch
+            {
+                throw new SpreadsheetReadWriteException("other errors");
+            }
+            Changed = false;
         }
 
         public override object GetCellValue(string name)
         {
-            // check for validity
+            DetermineIfNameIsInvalid(name);
 
             if (!nonemptyCellMap.ContainsKey(name))
             {
