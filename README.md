@@ -5,7 +5,7 @@ StartDate:			13-Jan-2023
 Course:				CS3500, University of Utah, School of Computing
 GitHubID:			25hlarsen4
 Repo:				https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-CommitDate:			16-Feb-2023 6:05 pm
+CommitDate:			16-Feb-2023 10:50 pm
 Solution:			Spreadsheet
 Copyright:			CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```
