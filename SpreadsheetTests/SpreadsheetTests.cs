@@ -1,9 +1,10 @@
 using SpreadsheetUtilities;
 using SS;
+using System.Xml;
 
 namespace SpreadsheetTests
 {
-    /// <summary>
+    /// <summary> aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     /// Author:      Hannah Larsen
     /// Partner:     None
     /// Date:        03-Feb-2023
@@ -28,6 +29,7 @@ namespace SpreadsheetTests
         public void TestSaveAndLoadSpreadsheet()
         {
             Spreadsheet sheet = new Spreadsheet();
+            Assert.IsFalse(sheet.Changed);
             sheet.SetContentsOfCell("a1", "2");
             sheet.SetContentsOfCell("b1", "=a1+1");
             sheet.SetContentsOfCell("c1", "hi");
@@ -83,6 +85,18 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
+        /// This tests that the Save method throws a SpreadsheetReadWriteException 
+        /// if the filepath is invalid.
+        /// </summary>
+        [TestMethod]
+        public void TestSaveException()
+        {
+            Spreadsheet sheet = new Spreadsheet();
+            Action a = () => sheet.Save("/some/nonsense/path.xml");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
         /// This tests that the 4-argument spreadsheet constructor throws a 
         /// SpreadsheetReadWriteException when a nonexistent xml file is passed in.
         /// </summary>
@@ -131,6 +145,65 @@ namespace SpreadsheetTests
         }
 
         /// <summary>
+        /// This tests that the 4-argument spreadsheet constructor throws a 
+        /// SpreadsheetReadWriteException if during the construction, it encounters
+        /// a circular dependency.
+        /// </summary>
+        [TestMethod]
+        public void TestLoadSpreadsheetCircularException()
+        {
+            using (XmlWriter writer = XmlWriter.Create("circ.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "default");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "a1");
+                writer.WriteElementString("contents", "=b1");
+                writer.WriteEndElement();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "b1");
+                writer.WriteElementString("contents", "=a1");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            Action a = () => new Spreadsheet("circ.txt", s => true, s => s, "default");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests that the 4-argument spreadsheet constructor throws a 
+        /// SpreadsheetReadWriteException if during the construction, it encounters
+        /// an invalid Formula.
+        /// </summary>
+        [TestMethod]
+        public void TestLoadSpreadsheetFormulaFormatException()
+        {
+            using (XmlWriter writer = XmlWriter.Create("format.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+                writer.WriteAttributeString("version", "default");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "a1");
+                writer.WriteElementString("contents", "=1++1");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            Action a = () => new Spreadsheet("format.txt", s => true, s => s, "default");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
         /// This tests the GetSavedVersion method in a simple case.
         /// </summary>
         [TestMethod]
@@ -155,6 +228,60 @@ namespace SpreadsheetTests
             Spreadsheet sheet = new Spreadsheet();
 
             Action a = () => sheet.GetSavedVersion("nonexistent.txt");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests that the GetSavedVersion method throws a 
+        /// SpreadsheetReadWriteException if there is no version in the xml file representing
+        /// a spreadsheet.
+        /// </summary>
+        [TestMethod]
+        public void TestGetSavedVersionNoVersion()
+        {
+            using (XmlWriter writer = XmlWriter.Create("novers.txt"))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("spreadsheet");
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "a1");
+                writer.WriteElementString("contents", "1");
+                writer.WriteEndElement();
+
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+
+            Spreadsheet sheet = new Spreadsheet();
+
+            Action a = () => sheet.GetSavedVersion("novers.txt");
+            Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
+        }
+
+        /// <summary>
+        /// This tests that the GetSavedVersion method throws a 
+        /// SpreadsheetReadWriteException if the xml file passed in is not in the
+        /// required form and therefore no version is found.
+        /// </summary>
+        [TestMethod]
+        public void TestGetSavedVersionNoVersion2()
+        {
+            using (XmlWriter writer = XmlWriter.Create("novers2.txt")) // NOTICE the file with no path
+            {
+                writer.WriteStartDocument();
+
+                writer.WriteStartElement("cell");
+                writer.WriteElementString("name", "a1");
+                writer.WriteElementString("contents", "1");
+                writer.WriteEndElement();
+
+                writer.WriteEndDocument();
+            }
+
+            Spreadsheet sheet = new Spreadsheet();
+
+            Action a = () => sheet.GetSavedVersion("novers2.txt");
             Assert.ThrowsException<SpreadsheetReadWriteException>(a, "failed to throw exception");
         }
 
