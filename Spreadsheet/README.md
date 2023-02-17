@@ -4,7 +4,7 @@ Partner:		None
 Course:			CS3500, University of Utah, School of Computing
 GitHubID:		25hlarsen4
 Repo:			https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
-Date:			09-Feb-2023 2:45 pm
+Date:			16-Feb-2023 10:50 pm
 Project:	  	Spreadsheet
 Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
 ```
@@ -12,11 +12,12 @@ Copyright:		CS3500 and Hannah Larsen - This work may not be copied for use in ac
 
 # Comments to Evaluators:
 
-I was not able to test that SetCellContents(string name, Formula formula) throws an ArgumentNullException when
-the formula parameter is null because it instead threw a NullReferenceException since Formula is non nullable, 
-however I still checked for that case in my code since we were told to in the instructions. Furthermore, the method
-header for GetDirectDependents says to throw both an ArgumentNullException and InvalidNameException when the input
-name is null, so I just used the more precise option of the InvalidNameException.
+In every method involved writing or reading Xml files, after writing a catch block for all specific exceptions 
+that the methods were expected to throw, like InvalidNameException, FormulaFormatException, etc, because it was 
+recommended by a TA, I added another catch block at the end to catch any other exceptions that may arise with a 
+more vague message, "other errors". While I was able to test that the methods threw all the specific exceptions 
+that were expected, I could not test the "other errors" catch block, which resulted in a slightly lower code coverage
+percentage. However, since we can rely on the fact that C# catch blocks work, I can trust that it will act as expected.
 
 # Assignment Specific Topics:
 
@@ -24,9 +25,10 @@ No additional write up was required by this assignment.
 
 # Consulted Peers:
 
-I consulted with one of my lab peers, Todd, and we talked about how we both were experiencing the issue noted in
-the above Comments to Evaluators section.
+I consulted with one of my lab peers, Todd, and we talked about good references we had found to help
+us with the xml reading and writing portions of the assignment.
 
 # References:
 
-1. HashSet<T> Class - https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1?view=net-7.0
+1. XmlWriter Class - https://learn.microsoft.com/en-us/dotnet/api/system.xml.xmlwriter?view=net-7.0
+2. XmlReader.Read Method - https://learn.microsoft.com/en-us/dotnet/api/system.xml.xmlreader.read?view=net-7.0
