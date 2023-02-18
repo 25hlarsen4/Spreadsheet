@@ -1,10 +1,10 @@
 ```
 Author:				Hannah Larsen
-Partner:			None
+Partner:			Todd Oldham
 StartDate:			13-Jan-2023
 Course:				CS3500, University of Utah, School of Computing
 GitHubID:			25hlarsen4
-Repo:				https://github.com/uofu-cs3500-spring23/spreadsheet-25hlarsen4
+Repo:				https://github.com/uofu-cs3500-spring23/assignment-six---gui---functioning-spreadsheet-larsenoldham.git
 CommitDate:			16-Feb-2023 10:50 pm
 Solution:			Spreadsheet
 Copyright:			CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
@@ -49,6 +49,10 @@ describe what they accomplish.
 - Separation of concerns
 - Well named methods
 
+# Best Team Practices:
+
+
+
 # Time Expenditures:
 
 Assignment 1 - Formula Evaluator:   	Predicted hours: 12  	   Actual hours: 11\
@@ -67,6 +71,9 @@ distributed amongst the assignment tasks.
 Assignment 5 - A Complete Spreadsheet Model:		Predicted hours: 12		   Actual hours: 13\
 Note: Two hours were spent debugging my strategy to detect cycles, but other than that my time was evenly
 distributed amongst the assignment tasks.
+
+Assignment 6 - Spreadsheet Front-End Graphical User Interface:		Predicted hours: 12		   Actual hours: \
+Note: 
 
 I have learned that while my time estimation skills are good since I often predict close to the actual time an 
 assignment takes me, I could definitely work on my time management skills. More specifically, I have a tendency
