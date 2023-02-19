@@ -14,7 +14,7 @@
 
         <VerticalStackLayout x:Name="Entire">
 
-            <!-- A Place to put the currently selected cell "namd" and "value" -->
+            <!-- A Place to put the currently selected cell "name" and "value" -->
             <Border
             StrokeThickness="2"
             HeightRequest="40">
@@ -33,7 +33,7 @@
                     HorizontalOptions="FillAndExpand"
                     HorizontalScrollBarVisibility="Always"
                     HeightRequest="500">
-                <HorizontalStackLayout>
+                <HorizontalStackLayout x:Name="Nest" BackgroundColor="LightBlue">
                     <VerticalStackLayout x:Name="LeftLabels"  BackgroundColor="LightBlue"></VerticalStackLayout>
                     <VerticalStackLayout x:Name="Grid"        BackgroundColor="LightGoldenrodYellow"></VerticalStackLayout>
                 </HorizontalStackLayout>
