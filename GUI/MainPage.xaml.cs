@@ -1,31 +1,59 @@
-﻿using System.Diagnostics;
+﻿using SS;
+using System.Diagnostics;
+//using static AndroidX.Concurrent.Futures.CallbackToFutureAdapter;
 
 namespace GUI
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
+        private readonly char[] COLHEADERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToArray();
+        private readonly int ROWS = 10;
 
         public MainPage()
         {
             InitializeComponent();
 
-            // initialize top labels
+            InitializeGrid();
 
-            for (int i = 64; i < 91; i++) {
-                char ascii = (char)i;
-                TopLabels.Add(
+            Spreadsheet ss = new Spreadsheet();
+        }
+
+        private void InitializeGrid()
+        {
+            // initialize upper-left corner
+            TopLabels.Add(
                 new Border
                 {
                     Stroke = Color.FromRgb(0, 0, 0),
                     StrokeThickness = 1,
-                    HeightRequest = 20,
+                    HeightRequest = 30,
                     WidthRequest = 75,
                     HorizontalOptions = LayoutOptions.Center,
                     Content =
                         new Label
                         {
-                            Text = ascii.ToString(),
+                            Text = $"-",
+                            BackgroundColor = Color.FromRgb(200, 200, 250),
+                            HorizontalTextAlignment = TextAlignment.Center
+                        }
+                }
+            );
+
+            // initialize top labels
+            foreach (var label in COLHEADERS)
+            {
+                TopLabels.Add(
+                new Border
+                {
+                    Stroke = Color.FromRgb(0, 0, 0),
+                    StrokeThickness = 1,
+                    HeightRequest = 30,
+                    WidthRequest = 75,
+                    HorizontalOptions = LayoutOptions.Center,
+                    Content =
+                        new Label
+                        {
+                            Text = $"{label}",
                             BackgroundColor = Color.FromRgb(200, 200, 250),
                             HorizontalTextAlignment = TextAlignment.Center
                         }
@@ -33,13 +61,12 @@ namespace GUI
                 );
             }
 
-
-
-            for (int row = 0; row < 10; row++)
+            // initialize the rest of the grid cells
+            for (int row = 0; row < ROWS; row++)
             {
                 var horiz = new HorizontalStackLayout();
 
-                // left column labels
+                // left column label
                 horiz.Add(
                     new Border
                     {
@@ -51,129 +78,29 @@ namespace GUI
                         Content =
                         new Label
                         {
-                            Text = $"{ row + 1}",
+                            Text = $"{row + 1}",
                             BackgroundColor = Color.FromRgb(200, 200, 250),
                             VerticalTextAlignment = TextAlignment.Center
                         }
                     }
                 );
 
-                for (int i = 1; i < 26; i++) 
+                for (int i = 1; i < 26; i++)
                 {
                     var entry = new Entry
                     {
-                        StyleId = ""
+                        StyleId = "",
+                        HeightRequest = 30,
+                        WidthRequest = 75,
                     };
+
+                    entry.Completed += OnEntryCompleted;
 
                     horiz.Add(entry);
                 }
 
-                Grid.Children.Add( horiz );
+                Grid.Children.Add(horiz);
             }
-
-
-
-
-
-
-
-
-
-            // initialize left labels
-
-            //for (int i = 1; i < 21; i++)
-            //{
-            //    LeftLabels.Add(
-            //    new Border
-            //    {
-            //        Stroke = Color.FromRgb(0, 0, 0),
-            //        StrokeThickness = 1,
-            //        HeightRequest = 20,
-            //        WidthRequest = 75,
-            //        HorizontalOptions = LayoutOptions.Center,
-            //        Content =
-            //            new Label
-            //            {
-            //                Text = i.ToString(),
-            //                BackgroundColor = Color.FromRgb(200, 200, 250),
-            //                HorizontalTextAlignment = TextAlignment.Center
-            //            }
-            //    }
-            //    );
-            //}
-
-            //// initialize grid
-
-            //for (int i = 64; i < 91; i++)
-            //{
-            //    VerticalStackLayout vert = new VerticalStackLayout();
-            //    Nest.Add(vert);
-
-            //    for (int j = 1; j < 21; j++)
-            //    {
-            //        vert.Add(
-            //        new Border
-            //        {
-            //            Stroke = Color.FromRgb(0, 0, 0),
-            //            StrokeThickness = 1,
-            //            HeightRequest = 20,
-            //            WidthRequest = 75,
-            //            HorizontalOptions = LayoutOptions.Center,
-            //            Content =
-            //                new Label
-            //                {
-            //                    Text = i.ToString(),
-            //                    BackgroundColor = Color.FromRgb(200, 200, 250),
-            //                    HorizontalTextAlignment = TextAlignment.Center
-            //                }
-            //        }
-            //        );
-            //    }
-            //}
-
-
-
-            //for (int i = 1; i < 21; i++)
-            //{
-            //    Grid1.Add(
-            //    new Border
-            //    {
-            //        Stroke = Color.FromRgb(0, 0, 0),
-            //        StrokeThickness = 1,
-            //        HeightRequest = 20,
-            //        WidthRequest = 75,
-            //        HorizontalOptions = LayoutOptions.Center,
-            //        Content =
-            //            new Label
-            //            {
-            //                Text = "",
-            //                BackgroundColor = Color.FromRgb(200, 200, 250),
-            //                HorizontalTextAlignment = TextAlignment.Center
-            //            }
-            //    }
-            //    );
-            //}
-
-            //for (int i = 1; i < 21; i++)
-            //{
-            //    Grid2.Add(
-            //    new Border
-            //    {
-            //        Stroke = Color.FromRgb(0, 0, 0),
-            //        StrokeThickness = 1,
-            //        HeightRequest = 20,
-            //        WidthRequest = 75,
-            //        HorizontalOptions = LayoutOptions.Center,
-            //        Content =
-            //            new Label
-            //            {
-            //                Text = "",
-            //                BackgroundColor = Color.FromRgb(200, 200, 250),
-            //                HorizontalTextAlignment = TextAlignment.Center
-            //            }
-            //    }
-            //    );
-            //}
         }
 
         private void FileMenuNew(object sender, EventArgs e)
@@ -184,6 +111,11 @@ namespace GUI
         private void FileMenuOpenAsync(object sender, EventArgs e)
         {
             Debug.WriteLine("here");
+        }
+
+        private void OnEntryCompleted(object sender, EventArgs e)
+        {
+            Debug.WriteLine("OnEntryCompleted");
         }
     }
 }
