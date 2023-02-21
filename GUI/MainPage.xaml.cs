@@ -1,12 +1,14 @@
 ﻿using SS;
 using System.Diagnostics;
+//using static Java.Util.Jar.Attributes;
+//using static System.Net.Mime.MediaTypeNames;
 //using static AndroidX.Concurrent.Futures.CallbackToFutureAdapter;
 
 namespace GUI
 {
     public partial class MainPage : ContentPage
     {
-        private readonly char[] COLHEADERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToArray();
+        private readonly char[] COLHEADERS = "ABCDEFGHIJ".ToArray();
         private readonly int ROWS = 10;
 
         Spreadsheet ss = new Spreadsheet();
@@ -94,6 +96,9 @@ namespace GUI
                         WidthRequest = 75,
                     };
 
+                    // don't forget to deal with string representation of ForumulaError
+                    entry.Text = ss.GetCellValue(entry.StyleId).ToString();
+
                     entry.Completed += OnEntryCompleted;
 
                     horiz.Add(entry);
@@ -115,8 +120,9 @@ namespace GUI
 
         private void OnEntryCompleted(object sender, EventArgs e)
         {
-            string cellName = StyleId;
-            string contents = ((Entry)sender).Text;
+            Entry ent = (Entry)sender;
+            string cellName = ent.StyleId;
+            string contents = ent.Text;
             ss.SetContentsOfCell(cellName, contents);
         }
     }
