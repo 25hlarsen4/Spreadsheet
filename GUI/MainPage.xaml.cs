@@ -9,13 +9,13 @@ namespace GUI
         private readonly char[] COLHEADERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToArray();
         private readonly int ROWS = 10;
 
+        Spreadsheet ss = new Spreadsheet();
+
         public MainPage()
         {
             InitializeComponent();
 
             InitializeGrid();
-
-            Spreadsheet ss = new Spreadsheet();
         }
 
         private void InitializeGrid()
@@ -85,11 +85,11 @@ namespace GUI
                     }
                 );
 
-                for (int i = 1; i < 26; i++)
+                foreach (var label in COLHEADERS)
                 {
                     var entry = new Entry
                     {
-                        StyleId = "",
+                        StyleId = $"{label}{row + 1}",
                         HeightRequest = 30,
                         WidthRequest = 75,
                     };
@@ -115,7 +115,9 @@ namespace GUI
 
         private void OnEntryCompleted(object sender, EventArgs e)
         {
-            Debug.WriteLine("OnEntryCompleted");
+            string cellName = StyleId;
+            string contents = ((Entry)sender).Text;
+            ss.SetContentsOfCell(cellName, contents);
         }
     }
 }
