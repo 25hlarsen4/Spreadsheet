@@ -1,4 +1,5 @@
 ﻿using SpreadsheetUtilities;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -483,6 +484,7 @@ namespace SS
         public override object GetCellValue(string name)
         {
             name = Normalize(name);
+            Debug.Assert(name != null);
             DetermineIfNameIsInvalid(name);
 
             if (!nonemptyCellMap.ContainsKey(name))
