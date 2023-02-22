@@ -1,4 +1,5 @@
-﻿using SS;
+﻿using SpreadsheetUtilities;
+using SS;
 using System.Diagnostics;
 //using static Java.Util.Jar.Attributes;
 //using static System.Net.Mime.MediaTypeNames;
@@ -11,13 +12,35 @@ namespace GUI
         private readonly char[] COLHEADERS = "ABCDEFGHIJ".ToArray();
         private readonly int ROWS = 10;
 
-        Spreadsheet ss = new Spreadsheet();
+        Spreadsheet ss = new Spreadsheet(s => true, s => s.ToUpper(), "six");
+
+        Dictionary<string, Entry> entries = new Dictionary<string, Entry>();
+
+        //private readonly char[] COLHEADERS;
+        //private readonly int ROWS;
+
+        //Spreadsheet ss;
+
+        //Dictionary<string, Entry> entries;
 
         public MainPage()
         {
+            //COLHEADERS = "ABCDEFGHIJ".ToArray();
+            //ROWS = 10;
+            //ss = new Spreadsheet(s => true, s => s.ToUpper(), "six");
+            //entries = new Dictionary<string, Entry>();
+
             InitializeComponent();
 
             InitializeGrid();
+
+            //Entry defaultFocused = entries["A1"];
+            //defaultFocused.Focus();
+        }
+
+        private void InitializeTopBar()
+        {
+
         }
 
         private void InitializeGrid()
@@ -100,6 +123,15 @@ namespace GUI
                     entry.Text = ss.GetCellValue(entry.StyleId).ToString();
 
                     entry.Completed += OnEntryCompleted;
+                    entry.Focused += OnEntryFocused;
+                    entry.Unfocused += OnEntryUnfocused;
+
+                    //if (entry.StyleId == "A1")
+                    //{
+                    //    OnEntryFocused(entry, EventArgs.Empty);
+                    //}
+
+                    entries.Add(entry.StyleId, entry);
 
                     horiz.Add(entry);
                 }
@@ -110,7 +142,11 @@ namespace GUI
 
         private void FileMenuNew(object sender, EventArgs e)
         {
-            Debug.WriteLine("here");
+            if (ss.Changed == true)
+            {
+                // display message to save
+            }
+            Application.Current.MainPage = new MainPage();
         }
 
         private void FileMenuOpenAsync(object sender, EventArgs e)
@@ -118,12 +154,84 @@ namespace GUI
             Debug.WriteLine("here");
         }
 
+        private void FileMenuSave(object sender, EventArgs e)
+        {
+            if (saveAs.Text == "")
+            {
+                // display error
+            }
+
+            string path = saveAs.Text + ".sprd";
+            try
+            {
+                ss.Save(saveAs.Text);
+            } catch
+            {
+                // error
+            }
+            
+        }
+
+        private void OnSaveAsCompleted(object sender, EventArgs e)
+        {
+            Entry ent = (Entry)sender;
+            saveAs.Text = ent.Text;
+        }
+
         private void OnEntryCompleted(object sender, EventArgs e)
         {
             Entry ent = (Entry)sender;
             string cellName = ent.StyleId;
             string contents = ent.Text;
-            ss.SetContentsOfCell(cellName, contents);
+
+            try
+            {
+                errorLabel.Text = "";
+                IList<string> names = ss.SetContentsOfCell(cellName, contents);
+                foreach (string name in names)
+                {
+                    // it should always contain name, right?
+                    if (entries.ContainsKey(name))
+                    {
+                        Entry cellEntry = entries[name];
+                        cellEntry.Text = ss.GetCellValue(cellName).ToString();
+                    }
+                }
+            } catch (FormulaFormatException)
+            {
+                errorLabel.Text = "Invalid Formula";
+            }
+
+        }
+
+        private void OnEntryTextChanged(object sender, EventArgs e)
+        {
+            Debug.WriteLine("here");
+        }
+
+        private void OnEntryFocused(object sender, EventArgs e)
+        {
+            Entry ent = (Entry)sender;
+            ent.Focus();
+
+            selectedContents.StyleId = ent.StyleId;
+
+            string name = ent.StyleId;
+            object contents = ss.GetCellContents(name);
+            ent.Text= contents.ToString();
+            // should formula contents have = at the beginning?????
+            selectedContents.Text = contents.ToString();
+
+            object val = ss.GetCellValue(name);
+            selectedCell.Text = "Name: " + name + " Value: " + val.ToString();
+        }
+
+        private void OnEntryUnfocused(object sender, EventArgs e)
+        {
+            Entry ent = (Entry)sender;
+            string name = ent.StyleId;
+            object val = ss.GetCellValue(name);
+            ent.Text = val.ToString();
         }
     }
 }

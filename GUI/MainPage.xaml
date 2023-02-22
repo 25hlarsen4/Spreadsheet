@@ -7,6 +7,7 @@
         <MenuBarItem Text="File">
             <MenuFlyoutItem Text="New" Clicked="FileMenuNew" />
             <MenuFlyoutItem Text="Open" Clicked="FileMenuOpenAsync" />
+            <MenuFlyoutItem Text="Save" Clicked="FileMenuSave" />
         </MenuBarItem>
     </ContentPage.MenuBarItems>
 
@@ -14,12 +15,29 @@
 
         <VerticalStackLayout x:Name="Entire">
 
+            <Entry 
+                x:Name="saveAs"
+                Placeholder="put file path here"
+                Completed="OnSaveAsCompleted" />
+            
+            <Label
+                x:Name="errorLabel"
+                Text=""
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="32"
+                HorizontalOptions="Center" />
+
             <!-- A Place to put the currently selected cell "name" and "value" -->
             <Border
             StrokeThickness="2"
             HeightRequest="40">
                 <HorizontalStackLayout>
                     <Label x:Name="selectedCell" Text="Stuff could go here" WidthRequest="100"/>
+                    <Entry 
+                        x:Name="selectedContents"
+                        Placeholder="contents"
+                        TextChanged="OnEntryTextChanged"
+                        Completed="OnEntryCompleted" />
                 </HorizontalStackLayout>
             </Border>
 
