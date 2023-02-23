@@ -145,6 +145,7 @@ namespace GUI
             if (ss.Changed == true)
             {
                 // display message to save
+                return;
             }
             Application.Current.MainPage = new MainPage();
         }
@@ -156,18 +157,20 @@ namespace GUI
 
         private void FileMenuSave(object sender, EventArgs e)
         {
+            // if they haven't provided a path to save to, display an error message
             if (saveAs.Text == "")
             {
-                // display error
+                errorLabel.Text = "Cannot save without a file path, make sure you have provided one above.";
+                return;
             }
 
             string path = saveAs.Text + ".sprd";
             try
             {
-                ss.Save(saveAs.Text);
+                ss.Save(path);
             } catch
             {
-                // error
+                errorLabel.Text = "Issue encountered, make sure the provided file path is valid.";
             }
             
         }
@@ -176,6 +179,8 @@ namespace GUI
         {
             Entry ent = (Entry)sender;
             saveAs.Text = ent.Text;
+            // get rid of error message if there was one due to no file path being provided
+            errorLabel.Text = "";
         }
 
         private void OnEntryCompleted(object sender, EventArgs e)

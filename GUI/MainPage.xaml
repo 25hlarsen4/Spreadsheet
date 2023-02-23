@@ -17,6 +17,7 @@
 
             <Entry 
                 x:Name="saveAs"
+                Text=""
                 Placeholder="put file path here"
                 Completed="OnSaveAsCompleted" />
             
