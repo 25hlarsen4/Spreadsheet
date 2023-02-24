@@ -8,6 +8,7 @@
             <MenuFlyoutItem Text="New" Clicked="FileMenuNew" />
             <MenuFlyoutItem Text="Open" Clicked="FileMenuOpenAsync" />
             <MenuFlyoutItem Text="Save" Clicked="FileMenuSave" />
+            <MenuFlyoutItem Text="Help Menu" Clicked="FileMenuHelp" />
         </MenuBarItem>
     </ContentPage.MenuBarItems>
 
@@ -15,30 +16,48 @@
 
         <VerticalStackLayout x:Name="Entire">
 
-            <Entry 
+            <!--<Entry 
                 x:Name="saveAs"
                 Text=""
                 Placeholder="put file path here"
                 Completed="OnSaveAsCompleted" />
-            
+
+            <Entry 
+                x:Name="openFile"
+                Text=""
+                Placeholder="put file to load from here"
+                Completed="OnSaveAsCompleted" />
+
             <Label
                 x:Name="errorLabel"
                 Text=""
                 SemanticProperties.HeadingLevel="Level1"
                 FontSize="32"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center" />-->
 
             <!-- A Place to put the currently selected cell "name" and "value" -->
             <Border
             StrokeThickness="2"
             HeightRequest="40">
                 <HorizontalStackLayout>
-                    <Label x:Name="selectedCell" Text="Stuff could go here" WidthRequest="100"/>
+                    <Label x:Name="selectedCell" 
+                           Text="Name:       Value:" 
+                           WidthRequest="250"/>
+
+                    <Label Text="Contents:" 
+                           WidthRequest="70"
+                           VerticalOptions="Center"/>
+                    
                     <Entry 
                         x:Name="selectedContents"
-                        Placeholder="contents"
                         TextChanged="OnEntryTextChanged"
                         Completed="OnEntryCompleted" />
+
+                    <Button
+                        x:Name="ClearBtn"
+                        Text="Clear entry"
+                        Clicked="ClearEntry"
+                        HorizontalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
 
