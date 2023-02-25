@@ -187,8 +187,8 @@ namespace GUI
 
 
 
-            // if file is not changed, issue warning
-            if (ss.Changed == true)
+            // if file has been changed without saving, issue warning
+            if (ss.Changed)
             {
                 // display message to save
                 bool answer = await DisplayAlert("Warning", "Possible data loss, do you want to save?", "Yes", "No");
@@ -197,7 +197,7 @@ namespace GUI
                 {
                     FileMenuSave(sender, e);
                     // if the save was unsuccessful, leave the method
-                    if (ss.Changed == true)
+                    if (ss.Changed)
                     {
                         return;
                     }
@@ -209,7 +209,7 @@ namespace GUI
 
         private async void FileMenuOpenAsync(object sender, EventArgs e)
         {
-            if (ss.Changed == true)
+            if (ss.Changed)
             {
                 // display message to save
                 bool answer = await DisplayAlert("Warning", "Possible data loss, do you want to save?", "Yes", "No");
@@ -218,7 +218,7 @@ namespace GUI
                 {
                     FileMenuSave(sender, e);
                     // if the save was unsuccessful, leave the method
-                    if (ss.Changed == true)
+                    if (ss.Changed)
                     {
                         return;
                     }
@@ -297,7 +297,7 @@ namespace GUI
                     if (entries.ContainsKey(name))
                     {
                         Entry cellEntry = entries[name];
-                        cellEntry.Text = ss.GetCellValue(cellName).ToString();
+                        cellEntry.Text = ss.GetCellValue(name).ToString();
                     }
                 }
 
@@ -320,15 +320,24 @@ namespace GUI
             Entry ent = (Entry)sender;
             ent.Focus();
 
+            // update the currently selected entry to the clear button knows what entry to clear if it is clicked
             currEntry = ent;
 
             selectedContents.StyleId = ent.StyleId;
 
             string name = ent.StyleId;
             object contents = ss.GetCellContents(name);
-            ent.Text= contents.ToString();
+
+            string newText = "";
+            if (contents is Formula)
+            {
+                newText += "=";
+            }
+            newText += contents.ToString();
+
+            ent.Text = newText;
             // should formula contents have = at the beginning?????
-            selectedContents.Text = contents.ToString();
+            selectedContents.Text = newText;
 
             object val = ss.GetCellValue(name);
             selectedCell.Text = "Name: " + name + "    Value: " + val.ToString();
