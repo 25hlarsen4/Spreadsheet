@@ -3,11 +3,11 @@ Author:				Hannah Larsen
 Partner:			Todd Oldham
 StartDate:			13-Jan-2023
 Course:				CS3500, University of Utah, School of Computing
-GitHubID:			25hlarsen4
+GitHubID:			25hlarsen4, Destroyr-of-u
 Repo:				https://github.com/uofu-cs3500-spring23/assignment-six---gui---functioning-spreadsheet-larsenoldham.git
-CommitDate:			16-Feb-2023 10:50 pm
+CommitDate:			Date and time of completion
 Solution:			Spreadsheet
-Copyright:			CS3500 and Hannah Larsen - This work may not be copied for use in academic coursework.
+Copyright:			CS3500, Hannah Larsen, Todd Oldham - This work may not be copied for use in academic coursework.
 ```
 
 
@@ -34,6 +34,9 @@ using the DependencyGraph created in Assignment 2.
 Now, as of the completion of Assignment 5, we have furthered the internal of our spread program. More specifically, we have
 added functionality to get and set cell values, rather than just contents, and have added functionality to create xml files
 representing spreadsheets.
+
+With the completion of assignment six the spreadsheet will now have a GUI that the users can use to change, save, and open
+spreadsheet files.
 
 # Examples of Good Software Practices:
 
