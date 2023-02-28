@@ -8,20 +8,51 @@ using System.Linq.Expressions;
 
 namespace GUI
 {
+    /// <summary>
+    /// Authors:     Hannah Larsen
+    /// Partner:     Todd Oldham
+    /// Date:        18-Feb-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500, Hannah Larsen, and Todd Oldham - This work may not be copied for use in academic coursework.
+    /// 
+    /// We, Hannah Larsen and Todd Oldham, certify that we wrote this code from scratch and did not copy it in part or whole 
+    /// from another source.
+    /// All references used in the completion of the assignment are cited in our README file.
+    /// 
+    /// File Contents:
+    /// This class provides the backing code for the spreadsheet GUI xaml code. It allows for
+    /// the creation of GUIs that represents Spreadsheet objects.
+    /// </summary>
     public partial class MainPage : ContentPage
     {
-
+        /// <summary>
+        /// This character array holds the column headers (A-Z)
+        /// </summary>
         private readonly char[] COLHEADERS;
+
+        /// <summary>
+        /// This int represents the number of rows to be included in the spreadsheet.
+        /// </summary>
         private readonly int ROWS;
 
+        /// <summary>
+        /// This is the underlying spreadsheet that the gui is to represent.
+        /// </summary>
         Spreadsheet ss;
 
+        /// <summary>
+        /// This Dictionary maps cell names to their corresponding Entry.
+        /// </summary>
         Dictionary<string, Entry> entries;
 
+        /// <summary>
+        /// This represents the most recently clicked entry, and will be the Entry
+        /// to be cleared, should the clear entry button be clicked.
+        /// </summary>
         Entry currEntry;
 
         /// <summary>
-        /// Empty Constructor that initializes the spreadsheet
+        /// Empty Constructor that initializes a gui representing an initially empty Spreadsheet.
         /// </summary>
         public MainPage()
         {
@@ -36,10 +67,10 @@ namespace GUI
         }
 
         /// <summary>
-        /// Constructor that takes a path for the open file function
-        /// of the spreadsheet
+        /// Constructor that initializes a gui representing a Spreadsheet initialized from
+        /// an input xml file.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path"> The file path to the xml file to create the spreadsheet from. </param>
         public MainPage(string path)
         {
             COLHEADERS = "ABCDEFGHIJ".ToArray();
@@ -134,8 +165,8 @@ namespace GUI
                         HeightRequest = 30,
                         WidthRequest = 75,
                     };
-
-                    // don't forget to deal with string representation of ForumulaError
+                    
+                    // the cells should display their values by default
                     entry.Text = ss.GetCellValue(entry.StyleId).ToString();
 
                     entry.Completed += OnEntryCompleted;
@@ -152,20 +183,20 @@ namespace GUI
         }
 
         /// <summary>
-        /// This method creates a new spreadsheet from the new tab
-        /// in the top file menu
+        /// This method creates a new spreadsheet gui as a result of the new tab
+        /// in the top file menu being clicked.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private async void FileMenuNew(object sender, EventArgs e)
         {
 
             // if file has been changed without saving, issue warning
             if (ss.Changed)
             {
-                // display message to save
                 bool answer = await DisplayAlert("Warning", "Possible data loss, do you want to save?", "Yes", "No");
 
+                // if the user does want to save
                 if (answer)
                 {
                     FileMenuSave(sender, e);
@@ -181,17 +212,18 @@ namespace GUI
         }
 
         /// <summary>
-        /// This method opens an existing spreadsheet file in the GUI
+        /// This method opens a gui representing an existing spreadsheet file.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private async void FileMenuOpenAsync(object sender, EventArgs e)
         {
+            // if file has been changed without saving, issue warning
             if (ss.Changed)
             {
-                // display message to save
                 bool answer = await DisplayAlert("Warning", "Possible data loss, do you want to save?", "Yes", "No");
 
+                // if the user does want to save
                 if (answer)
                 {
                     FileMenuSave(sender, e);
@@ -211,11 +243,11 @@ namespace GUI
         }
 
         /// <summary>
-        /// This method is for saving spreadsheets that have been changed
-        /// a path for the file is obtained and used to save
+        /// This method is for saving spreadsheet guis, a path for the file to save to is 
+        /// obtained and used to save.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private async void FileMenuSave(object sender, EventArgs e)
         {
             string path = await DisplayPromptAsync("", "Provide a file path to save to");
@@ -232,30 +264,30 @@ namespace GUI
 
         /// <summary>
         /// This method is used to provide a help menu to the TAs to know how to use our
-        /// spreadsheet
+        /// spreadsheet gui.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private async void FileMenuHelp(object sender, EventArgs e)
         {
             await DisplayAlert("Help Menu", "Change selections by clicking.\n" +
-                " You can edit cell contents by clicking a cell in the grid, \n" +
-                " typing the contents, and hitting enter, or by editing the contents label up top. \n" +
+                "You can edit cell contents by clicking a cell in the grid, \n" +
+                "typing the contents, and hitting enter, or by editing the contents label up top. \n" +
                 "Furthermore, if you want to delete a cell with particularly long contents, \n" +
-                " instead of backspacing everything and hitting enter, you can simply select the desired cell by clicking on it \n" +
-                "and then hit the 'clear entry' button provided.\n" +
+                "instead of backspacing everything and hitting enter, you can simply select the desired cell by clicking on it \n" +
+                "and then hit the 'clear entry' button provided. Dependent cells will not be cleared in case you want the dependencies to remain. \n" +
                 "To create a new spreadsheet, click file 'new' file. \n" +
                 "To save a spreadsheet, click file 'save' file. \n" +
                 "To open an existing spreadsheet, click file 'open' file."
-                , "OK");
+                ,"OK");
         }
 
         /// <summary>
-        /// When an entry in one of the cells is completed this method is called
-        /// this calls set cell contents, and cell value and displays them in cells
+        /// When an entry in one of the cells is completed this method set that cell's contents, 
+        /// updates each dependent cell's value, and displays said changes
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private async void OnEntryCompleted(object sender, EventArgs e)
         {
             Entry ent = (Entry)sender;
@@ -279,7 +311,11 @@ namespace GUI
 
             } catch (FormulaFormatException)
             {
-                await DisplayAlert("Alert", "Invalid formula", "OK");
+                await DisplayAlert("Alert", "Invalid formula.", "OK");
+            }
+            catch (CircularException)
+            {
+                await DisplayAlert("Alert", "Cycle encountered.", "OK");
             }
 
         }
@@ -288,8 +324,8 @@ namespace GUI
         /// This method is here because the Entries use the text changed to 
         /// display changed text
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private void OnEntryTextChanged(object sender, EventArgs e)
         {
             Debug.WriteLine("here");
@@ -300,8 +336,8 @@ namespace GUI
         /// When the cell is selected the contents should be displayed instead
         /// of the value
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private void OnEntryFocused(object sender, EventArgs e)
         {
             Entry ent = (Entry)sender;
@@ -334,8 +370,8 @@ namespace GUI
         /// When the cell is unfocused the value should be shown 
         /// instead of the contents
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private void OnEntryUnfocused(object sender, EventArgs e)
         {
             Entry ent = (Entry)sender;
@@ -348,8 +384,8 @@ namespace GUI
         /// This method is used to clear an entry of the spreadsheet instead
         /// of having to manually empty the cell
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender"> the sender </param>
+        /// <param name="e"> the event args </param>
         private void ClearEntry(object sender, EventArgs e)
         {
             currEntry.Text = "";

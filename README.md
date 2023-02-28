@@ -53,8 +53,15 @@ describe what they accomplish.
 - Well named methods
 
 # Best Team Practices:
+The partnership was most effective in that we communicated consistently and effectively so we could meet up several times early 
+in the week to get the assignment done. Furthermore, when we weren't actively working together, we separately researched issues 
+that had arisen so our coding process could be faster when we met up again later to fix the issue. Almost the assignment was done
+by pair programming standards together, so we did not have to assign each other small tasks to complete since we always worked on
+the assignment together.
 
-
+An area of teamwork that we could improve upon is if we hit a problem that neither of us can solve, instead of wasting many hours
+on trying to figure it out in one sitting, we should try to take a break and reach out for outside guidance in the future. Other 
+than that, we worked together well and had no other issues.
 
 # Time Expenditures:
 
