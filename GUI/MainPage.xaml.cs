@@ -1,12 +1,10 @@
 ﻿using SpreadsheetUtilities;
 using SS;
-//using System.Diagnostics;
-//using System.Linq.Expressions;
 
 namespace GUI
 {
     /// <summary>
-    /// Authors:     Hannah Larsen
+    /// Author:     Hannah Larsen
     /// Partner:     Todd Oldham
     /// Date:        18-Feb-2023
     /// Course:      CS3500, University of Utah, School of Computing

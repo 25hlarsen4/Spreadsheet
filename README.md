@@ -82,11 +82,11 @@ Assignment 5 - A Complete Spreadsheet Model:		Predicted hours: 12		   Actual hou
 Note: Two hours were spent debugging my strategy to detect cycles, but other than that my time was evenly
 distributed amongst the assignment tasks.
 
-Assignment 6 - Spreadsheet Front-End Graphical User Interface:		Predicted hours: 12		   Actual hours: \
-Note: 
+Assignment 6 - Spreadsheet Front-End Graphical User Interface:		Predicted hours: 12		   Actual hours: 12\
+Note: We each spent those 12 hours working together via pair programming.
+Also note that several hours were inefficiently spent trying to understand the basics of how to set up the spreadsheet 
+layout, but other than that, our time was spent evenly across the assignment requirements.
 
-I have learned that while my time estimation skills are good since I often predict close to the actual time an 
-assignment takes me, I could definitely work on my time management skills. More specifically, I have a tendency
-of "drafting" code/ not putting in my full effort when I first start doing an assignment, which often results
-in me having to spend more time fixing my loose mistakes later on. This is an inefficient way to work and manage
-time, and is something I will try to work on from now on.
+Both of our time estimation skills are improving throughout this semester. In this first assignment working together, 
+we were able to correctly guess how long it would take us. This tells us that we have an accurate perception of our own 
+programming abilities and that each of our abilities line up fairly well.

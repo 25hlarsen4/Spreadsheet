@@ -1,4 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- ///Author:      Hannah Larsen
+    /// Partner:     Todd Oldham
+    /// Date:        18-Feb-2023
+    /// Course:      CS3500, University of Utah, School of Computing
+    /// Copyright:   CS3500, Hannah Larsen, and Todd Oldham - This work may not be copied for use in academic coursework.
+    /// 
+    /// We, Hannah Larsen and Todd Oldham, certify that we wrote this code from scratch and did not copy it in part or whole 
+    /// from another source.
+    /// All references used in the completion of the assignment are cited in our README file.
+    /// 
+    /// File Contents:
+    /// This xaml file provides the basic outline for what our spreadsheet gui will look like.
+    /// The general outline includes a menu bar and a vertical stack of horizontal stacks. -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GUI.MainPage">
