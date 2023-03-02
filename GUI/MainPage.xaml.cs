@@ -267,7 +267,7 @@ namespace GUI
         private async void FileMenuHelp(object sender, EventArgs e)
         {
             await DisplayAlert("Help Menu", "Change selections by clicking.\n" +
-                "You can edit cell contents by clicking a cell in the grid, \n" +
+                "You can select a cell by clicking on it. You can edit cell contents by clicking a cell in the grid, \n" +
                 "typing the contents, and hitting enter, or by editing the contents label up top. \n" +
                 "Furthermore, as a special feature, if you want to delete a cell with particularly long contents, \n" +
                 "instead of backspacing everything and hitting enter, you can simply select the desired cell by clicking on it \n" +

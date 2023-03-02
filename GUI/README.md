@@ -4,7 +4,7 @@ Partner:		Todd Oldham
 Course:			CS3500, University of Utah, School of Computing
 GitHubID:		25hlarsen4, Destroyr-of-u
 Repo:			https://github.com/uofu-cs3500-spring23/assignment-six---gui---functioning-spreadsheet-larsenoldham.git
-Date:			Date and time of completion
+CommitDate:		02-March-2023, 2:40 pm
 Project:	  	GUI
 Copyright:		CS3500, Hannah Larsen, and Todd Oldham - This work may not be copied for use in academic coursework.
 ```
