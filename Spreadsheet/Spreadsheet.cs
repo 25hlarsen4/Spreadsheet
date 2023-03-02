@@ -527,8 +527,7 @@ namespace SS
             // otherwise it's a Formula
             else
             {
-                Formula form = (Formula)cell.getContent();
-                object evaluation = form.Evaluate(LookUp);
+                object evaluation = GetCellValue(name);
 
                 if (evaluation is FormulaError)
                 {
