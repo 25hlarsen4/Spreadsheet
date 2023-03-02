@@ -1,10 +1,7 @@
 ﻿using SpreadsheetUtilities;
 using SS;
-using System.Diagnostics;
-using System.Linq.Expressions;
-//using static Java.Util.Jar.Attributes;
-//using static System.Net.Mime.MediaTypeNames;
-//using static AndroidX.Concurrent.Futures.CallbackToFutureAdapter;
+//using System.Diagnostics;
+//using System.Linq.Expressions;
 
 namespace GUI
 {
@@ -56,8 +53,8 @@ namespace GUI
         /// </summary>
         public MainPage()
         {
-            COLHEADERS = "ABCDEFGHIJ".ToArray();
-            ROWS = 10;
+            COLHEADERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToArray();
+            ROWS = 99;
             ss = new Spreadsheet(s => true, s => s.ToUpper(), "six");
             entries = new Dictionary<string, Entry>();
 
@@ -152,7 +149,8 @@ namespace GUI
                         {
                             Text = $"{row + 1}",
                             BackgroundColor = Color.FromRgb(200, 200, 250),
-                            VerticalTextAlignment = TextAlignment.Center
+                            VerticalTextAlignment = TextAlignment.Center,
+                            HorizontalTextAlignment = TextAlignment.Center
                         }
                     }
                 );
@@ -273,7 +271,7 @@ namespace GUI
             await DisplayAlert("Help Menu", "Change selections by clicking.\n" +
                 "You can edit cell contents by clicking a cell in the grid, \n" +
                 "typing the contents, and hitting enter, or by editing the contents label up top. \n" +
-                "Furthermore, if you want to delete a cell with particularly long contents, \n" +
+                "Furthermore, as a special feature, if you want to delete a cell with particularly long contents, \n" +
                 "instead of backspacing everything and hitting enter, you can simply select the desired cell by clicking on it \n" +
                 "and then hit the 'clear entry' button provided. Dependent cells will not be cleared in case you want the dependencies to remain. \n" +
                 "To create a new spreadsheet, click file 'new' file. \n" +
@@ -297,9 +295,9 @@ namespace GUI
             try
             {
                 IList<string> names = ss.SetContentsOfCell(cellName, contents);
+                // update the dependent cells
                 foreach (string name in names)
                 {
-                    // it should always contain name, right?
                     if (entries.ContainsKey(name))
                     {
                         Entry cellEntry = entries[name];
@@ -318,17 +316,6 @@ namespace GUI
                 await DisplayAlert("Alert", "Cycle encountered.", "OK");
             }
 
-        }
-
-        /// <summary>
-        /// This method is here because the Entries use the text changed to 
-        /// display changed text
-        /// </summary>
-        /// <param name="sender"> the sender </param>
-        /// <param name="e"> the event args </param>
-        private void OnEntryTextChanged(object sender, EventArgs e)
-        {
-            Debug.WriteLine("here");
         }
 
         /// <summary>
@@ -352,6 +339,7 @@ namespace GUI
             object contents = ss.GetCellContents(name);
 
             string newText = "";
+            // if the contents are a formula, put an = sign in front
             if (contents is Formula)
             {
                 newText += "=";
@@ -359,7 +347,7 @@ namespace GUI
             newText += contents.ToString();
 
             ent.Text = newText;
-            // should formula contents have = at the beginning?????
+            // display the contents
             selectedContents.Text = newText;
 
             object val = ss.GetCellValue(name);

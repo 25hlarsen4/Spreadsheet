@@ -31,7 +31,6 @@
                     
                     <Entry 
                         x:Name="selectedContents"
-                        TextChanged="OnEntryTextChanged"
                         Completed="OnEntryCompleted" />
 
                     <Button
