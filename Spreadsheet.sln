@@ -20,8 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyGraph", "Dependen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyGraphTests", "DependencyGraphTests\DependencyGraphTests.csproj", "{8E61E550-9CA5-4818-8352-0C2502038F45}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GradingTests", "GradingTests\GradingTests.csproj", "{E5180484-675C-441E-B620-AC1B87B718EE}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Formula", "Formula\Formula.csproj", "{6B4B65E0-4EB5-424E-90BB-18E8ACB702A6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaTests", "FormulaTests\FormulaTests.csproj", "{52B059FA-FFE3-4B39-B30B-8B950238D01A}"
@@ -30,7 +28,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spreadsheet", "Spreadsheet\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpreadsheetTests", "SpreadsheetTests\SpreadsheetTests.csproj", "{FA178413-08C5-48C8-AEA7-E3A1414383E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GUI", "GUI\GUI.csproj", "{2A524C80-7891-48E3-8BDD-307A705D6AF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GUI", "GUI\GUI.csproj", "{2A524C80-7891-48E3-8BDD-307A705D6AF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -54,10 +52,6 @@ Global
 		{8E61E550-9CA5-4818-8352-0C2502038F45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E61E550-9CA5-4818-8352-0C2502038F45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E61E550-9CA5-4818-8352-0C2502038F45}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E5180484-675C-441E-B620-AC1B87B718EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E5180484-675C-441E-B620-AC1B87B718EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E5180484-675C-441E-B620-AC1B87B718EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E5180484-675C-441E-B620-AC1B87B718EE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6B4B65E0-4EB5-424E-90BB-18E8ACB702A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6B4B65E0-4EB5-424E-90BB-18E8ACB702A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B4B65E0-4EB5-424E-90BB-18E8ACB702A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
