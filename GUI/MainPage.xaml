@@ -54,8 +54,8 @@
                 </HorizontalStackLayout>
             </Border>
 
-            <!-- the column headers: A, B, C, ... -->
-            <HorizontalStackLayout x:Name="TopLabels" BackgroundColor="LightBlue"/>
+            <!-- the column headers: A, B, C, ... --><!--
+            <HorizontalStackLayout x:Name="TopLabels" BackgroundColor="LightBlue"/>-->
 
             <!-- the Grid of Spreadsheet GUI Cells -->
             <ScrollView
@@ -64,10 +64,16 @@
                     HorizontalOptions="FillAndExpand"
                     HorizontalScrollBarVisibility="Always"
                     HeightRequest="500">
-                <HorizontalStackLayout x:Name="Nest" BackgroundColor="LightBlue">
-                    <VerticalStackLayout x:Name="LeftLabels"  BackgroundColor="LightBlue"></VerticalStackLayout>
-                    <VerticalStackLayout x:Name="Grid"        BackgroundColor="LightGoldenrodYellow"></VerticalStackLayout>
-                </HorizontalStackLayout>
+                <VerticalStackLayout
+                    x:Name="pls">
+                    <!-- the column headers: A, B, C, ... -->
+                    <HorizontalStackLayout x:Name="TopLabels" BackgroundColor="LightBlue"/>
+                    <HorizontalStackLayout x:Name="Nest" BackgroundColor="LightBlue">
+                        <VerticalStackLayout x:Name="LeftLabels"  BackgroundColor="LightBlue"></VerticalStackLayout>
+                        <VerticalStackLayout x:Name="Grid"        BackgroundColor="LightGoldenrodYellow"></VerticalStackLayout>
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
             </ScrollView>
         </VerticalStackLayout>
 
