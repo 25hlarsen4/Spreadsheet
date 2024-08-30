@@ -36,7 +36,8 @@ added functionality to get and set cell values, rather than just contents, and h
 representing spreadsheets.
 
 With the completion of assignment six the spreadsheet will now have a GUI that the users can use to change, save, and open
-spreadsheet files.
+spreadsheet files. To save, provide an absolute path, including what you want the file to be called without an extension 
+(ie C:\Users\hanna\Downloads\Spreadsheets\blah). To open, provide the same thing that you typed in to save.
 
 # Examples of Good Software Practices:
 
