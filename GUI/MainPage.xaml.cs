@@ -68,8 +68,8 @@ namespace GUI
         /// <param name="path"> The file path to the xml file to create the spreadsheet from. </param>
         public MainPage(string path)
         {
-            COLHEADERS = "ABCDEFGHIJ".ToArray();
-            ROWS = 10;
+            COLHEADERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToArray();
+            ROWS = 99;
             ss = new Spreadsheet(path, s => true, s => s.ToUpper(), "six");
             entries = new Dictionary<string, Entry>();
 
