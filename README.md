@@ -15,15 +15,15 @@ Copyright:			CS3500, Hannah Larsen, Todd Oldham - This work may not be copied fo
 
 - Spreadsheet cells are capable of holding whole numbers, decimals, or string values.
 - Spreadsheet cells are capable of performing mathematical formula evaluations. The allowed operators are +, -, *, /, (, and ).
-  The allowed operands are typed out non-negative numbers, or references to other cell values, which can be negative or non-negative values.
-  For example: =1+1 is valid, =1-1 is valid, =-1+1 is not valid.
-               Then say cell A1 contains value -1. =A1+1 is valid.
+  The allowed operands are typed out numbers or references to other cells which must have number values.
+  Formula examples: =1+1 is valid, =-1+1 is valid, =(-2+1)*5.
+                    Then say cell A1 contains value -1, create a forumla referencing A1 like so: =A1+1
 
 - When you click on a cell/are focues on it, it will show the cell contents (either a typed out number or string value, or a formula that was entered)
 - When you are no longer focused on a cell, it will show the actual cell value (either a typed out number or string value, or the evaluation of a formula in the cell)
 
 As of the completion of Assignment 1, the Spreadsheet program was capable of evaluating valid mathematical 
-expressions without negative integers, and the only operators allowed were +, -, *, /, (, and ).
+expressions where the only operators allowed were +, -, *, /, (, and ).
 Variables were also allowed (in the form of one or more upper or lower case letters followed by one or more digits), 
 and their values were looked up using a delegate. 
 
@@ -47,20 +47,6 @@ representing spreadsheets.
 With the completion of assignment six the spreadsheet will now have a GUI that the users can use to change, save, and open
 spreadsheet files. To save, provide an absolute path, including what you want the file to be called without an extension 
 (ie C:\Users\name\Downloads\Spreadsheets\nameOfSpreadsheetFile). To open, provide the same thing that you typed in to save.
-
-# Examples of Good Software Practices:
-
-First, my use of DRY programming shows good software practices. I used DRY programming by using inheritdoc rather than explicitly
-repeating method headers that were already written in the AbstractSpreadsheet class.
-Furthermore, I used code re-use to show good software practice. I specifically did this by creating a helper method to use in 
-each of the three SetCellContents methods since each of those methods included a lot of the same code.
-See the following list for more good software practices that I used.
-Finally, my use of well named methods shows good software practices. You can specifically see this in methods like
-DetermineIfNameIsInvalid, RecalculateCellValues, DetermineVariableValidity, etc, all of which have names that clearly
-describe what they accomplish.
-
-- Separation of concerns
-- Well named methods
 
 # How to use:
 - To fill a cell with an numerical or string value, click the cell, type the value, and hit enter.
