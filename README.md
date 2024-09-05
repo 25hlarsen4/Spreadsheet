@@ -13,6 +13,15 @@ Copyright:			CS3500, Hannah Larsen, Todd Oldham - This work may not be copied fo
 
 # Overview of the Spreadsheet Functionality:
 
+- Spreadsheet cells are capable of holding whole numbers, decimals, or string values.
+- Spreadsheet cells are capable of performing mathematical formula evaluations. The allowed operators are +, -, *, /, (, and ).
+  The allowed operands are typed out non-negative numbers, or references to other cell values, which can be negative or non-negative values.
+  For example: =1+1 is valid, =1-1 is valid, =-1+1 is not valid.
+               Then say cell A1 contains value -1. =A1+1 is valid.
+
+- When you click on a cell/are focues on it, it will show the cell contents (either a typed out number or string value, or a formula that was entered)
+- When you are no longer focused on a cell, it will show the actual cell value (either a typed out number or string value, or the evaluation of a formula in the cell)
+
 As of the completion of Assignment 1, the Spreadsheet program was capable of evaluating valid mathematical 
 expressions without negative integers, and the only operators allowed were +, -, *, /, (, and ).
 Variables were also allowed (in the form of one or more upper or lower case letters followed by one or more digits), 
@@ -37,7 +46,7 @@ representing spreadsheets.
 
 With the completion of assignment six the spreadsheet will now have a GUI that the users can use to change, save, and open
 spreadsheet files. To save, provide an absolute path, including what you want the file to be called without an extension 
-(ie C:\Users\hanna\Downloads\Spreadsheets\blah). To open, provide the same thing that you typed in to save.
+(ie C:\Users\name\Downloads\Spreadsheets\nameOfSpreadsheetFile). To open, provide the same thing that you typed in to save.
 
 # Examples of Good Software Practices:
 
@@ -53,41 +62,9 @@ describe what they accomplish.
 - Separation of concerns
 - Well named methods
 
-# Best Team Practices:
-The partnership was most effective in that we communicated consistently and effectively so we could meet up several times early 
-in the week to get the assignment done. Furthermore, when we weren't actively working together, we separately researched issues 
-that had arisen so our coding process could be faster when we met up again later to fix the issue. Almost the assignment was done
-by pair programming standards together, so we did not have to assign each other small tasks to complete since we always worked on
-the assignment together.
-
-An area of teamwork that we could improve upon is if we hit a problem that neither of us can solve, instead of wasting many hours
-on trying to figure it out in one sitting, we should try to take a break and reach out for outside guidance in the future. Other 
-than that, we worked together well and had no other issues.
-
-# Time Expenditures:
-
-Assignment 1 - Formula Evaluator:   	Predicted hours: 12  	   Actual hours: 11\
-Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
-
-Assignment 2 - Dependency Graph:		Predicted hours: 13		   Actual hours: 12\
-Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
-
-Assignment 3 - Refactoring the FormulaEvaluator:		Predicted hours: 12		   Actual hours: 12\
-Note: No serious hangups arose, so my time spent working was evenly distributed amongst the assignment tasks.
-
-Assignment 4 - Onward to a Spreadsheet:		Predicted hours: 12		   Actual hours: 11\
-Note: An hour was spent trying to fix a slightly off Regex expression, but other than that my time was evenly
-distributed amongst the assignment tasks.
-
-Assignment 5 - A Complete Spreadsheet Model:		Predicted hours: 12		   Actual hours: 13\
-Note: Two hours were spent debugging my strategy to detect cycles, but other than that my time was evenly
-distributed amongst the assignment tasks.
-
-Assignment 6 - Spreadsheet Front-End Graphical User Interface:		Predicted hours: 12		   Actual hours: 12\
-Note: We each spent those 12 hours working together via pair programming.
-Also note that several hours were inefficiently spent trying to understand the basics of how to set up the spreadsheet 
-layout, but other than that, our time was spent evenly across the assignment requirements.
-
-Both of our time estimation skills are improving throughout this semester. In this first assignment working together, 
-we were able to correctly guess how long it would take us. This tells us that we have an accurate perception of our own 
-programming abilities and that each of our abilities line up fairly well.
+# How to use:
+- To fill a cell with an numerical or string value, click the cell, type the value, and hit enter.
+- To fill a cell with a formula to be evaluated, for example to make cell C1 = A1 + B1, click cell C1 and type the desired formula, starting with an = sign, no spacing requirements.
+  So for this example, click cell C1, type =A1+B1, and hit enter
+- To save, provide an absolute path, including what you want the file to be called without an extension (ie C:\Users\name\Downloads\Spreadsheets\nameOfSpreadsheetFile). 
+- To open a previously saved spreadsheet, provide the same path that you provided to save the spreadsheet.
