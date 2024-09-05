@@ -617,25 +617,71 @@ namespace SpreadsheetUtilities
         private static IEnumerable<string> GetTokens(String formula)
         {
             // Patterns for individual tokens
-            String lpPattern = @"\(";
-            String rpPattern = @"\)";
-            String opPattern = @"[\+\-*/]";
-            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
-            String spacePattern = @"\s+";
+            string lpPattern = @"\(";
+            string rpPattern = @"\)";
+            string opPattern = @"[\+\*/]";  // Removed '-' from operators
+            string varPattern = @"[a-zA-Z_](?:[a-zA-Z_]|\d)*";
+            string doublePattern = @"-?\d+(\.\d+)?([eE][\+-]?\d+)?";  // Modified pattern to allow negative numbers
+            string spacePattern = @"\s+";
 
-            // Overall pattern
-            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-                                            lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
+            // Overall pattern (note that - is no longer in the opPattern)
+            string pattern = string.Format("({0})|({1})|({2})|({3})|({4})|({5})|(-)",
+                                           lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
 
-            // Enumerate matching tokens that don't consist solely of white space.
-            foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+            bool lastWasOperator = true;  // To track context for negative numbers
+
+            foreach (string s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
             {
-                if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+                if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline)) // Skip white space
                 {
-                    yield return s;
+                    if (s == "-" && lastWasOperator)  // If - follows an operator, consider it part of a number
+                    {
+                        // Get the next token (number) and combine them
+                        var nextTokens = Regex.Split(formula.Substring(formula.IndexOf(s) + 1), pattern, RegexOptions.IgnorePatternWhitespace);
+                        string nextToken = nextTokens.FirstOrDefault(t => !Regex.IsMatch(t, @"^\s*$", RegexOptions.Singleline));
+
+                        if (nextToken != null && Regex.IsMatch(nextToken, doublePattern))
+                        {
+                            yield return s + nextToken;
+                            formula = formula.Substring(formula.IndexOf(nextToken) + nextToken.Length); // Skip the tokenized part
+                        }
+                        else
+                        {
+                            yield return s;
+                        }
+                    }
+                    else
+                    {
+                        yield return s;
+                    }
+
+                    // Update the lastWasOperator flag
+                    lastWasOperator = Regex.IsMatch(s, @"^[\+\*/\(\)-]$");  // Operators and parentheses
                 }
             }
+
+
+
+            //// Patterns for individual tokens
+            //String lpPattern = @"\(";
+            //String rpPattern = @"\)";
+            //String opPattern = @"[\+\-*/]";
+            //String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
+            //String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
+            //String spacePattern = @"\s+";
+
+            //// Overall pattern
+            //String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
+            //                                lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
+
+            //// Enumerate matching tokens that don't consist solely of white space.
+            //foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+            //{
+            //    if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+            //    {
+            //        yield return s;
+            //    }
+            //}
 
         }
     }
