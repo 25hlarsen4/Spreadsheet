@@ -17,6 +17,8 @@
 //                to numeric tokens
 
 using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Text;
 
 namespace SpreadsheetUtilities
 {
@@ -216,7 +218,7 @@ namespace SpreadsheetUtilities
         public Formula(String formula) :
             this(formula, s => s, s => true)
         {
-            tokens = GetTokens(formula);
+            tokens = Tokenize(formula);
             DetermineIfSyntacticallyIncorrect();
         }
 
@@ -242,7 +244,7 @@ namespace SpreadsheetUtilities
             normalizer = normalize;
             validator = isValid;
 
-            tokens = GetTokens(formula);
+            tokens = Tokenize(formula);
             DetermineIfSyntacticallyIncorrect();
         }
 
@@ -606,84 +608,50 @@ namespace SpreadsheetUtilities
             return code;
         }
 
-        /// <summary>
-        /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
-        /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
-        /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
-        /// match one of those patterns.  There are no empty tokens, and no token contains white space.
-        /// </summary>
-        /// <param name="formula"> The formula to get tokens from. </param>
-        /// <returns> An IEnumerable of the passed in formula's tokens. </returns>
-        private static IEnumerable<string> GetTokens(String formula)
+        private static List<string> Tokenize(string expression)
         {
-            // Patterns for individual tokens
-            string lpPattern = @"\(";
-            string rpPattern = @"\)";
-            string opPattern = @"[\+\*/]";  // Removed '-' from operators
-            string varPattern = @"[a-zA-Z_](?:[a-zA-Z_]|\d)*";
-            string doublePattern = @"-?\d+(\.\d+)?([eE][\+-]?\d+)?";  // Modified pattern to allow negative numbers
-            string spacePattern = @"\s+";
+            var tokens = new List<string>();
+            var numberBuilder = new StringBuilder();
+            bool lastWasOperator = true;
 
-            // Overall pattern (note that - is no longer in the opPattern)
-            string pattern = string.Format("({0})|({1})|({2})|({3})|({4})|({5})|(-)",
-                                           lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
-
-            bool lastWasOperator = true;  // To track context for negative numbers
-
-            foreach (string s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+            for (int i = 0; i < expression.Length; i++)
             {
-                if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline)) // Skip white space
-                {
-                    if (s == "-" && lastWasOperator)  // If - follows an operator, consider it part of a number
-                    {
-                        // Get the next token (number) and combine them
-                        var nextTokens = Regex.Split(formula.Substring(formula.IndexOf(s) + 1), pattern, RegexOptions.IgnorePatternWhitespace);
-                        string nextToken = nextTokens.FirstOrDefault(t => !Regex.IsMatch(t, @"^\s*$", RegexOptions.Singleline));
+                char c = expression[i];
 
-                        if (nextToken != null && Regex.IsMatch(nextToken, doublePattern))
-                        {
-                            yield return s + nextToken;
-                            formula = formula.Substring(formula.IndexOf(nextToken) + nextToken.Length); // Skip the tokenized part
-                        }
-                        else
-                        {
-                            yield return s;
-                        }
+                if (char.IsDigit(c) || c == '.')
+                {
+                    numberBuilder.Append(c);
+                    lastWasOperator = false;
+                }
+                else
+                {
+                    if (numberBuilder.Length > 0)
+                    {
+                        tokens.Add(numberBuilder.ToString());
+                        numberBuilder.Clear();
+                    }
+
+                    if (c == '-' && lastWasOperator)
+                    {
+                        // If last was an operator, treat "-" as part of a negative number.
+                        numberBuilder.Append(c);
                     }
                     else
                     {
-                        yield return s;
+                        tokens.Add(c.ToString());
+                        lastWasOperator = (c != ')');
                     }
-
-                    // Update the lastWasOperator flag
-                    lastWasOperator = Regex.IsMatch(s, @"^[\+\*/\(\)-]$");  // Operators and parentheses
                 }
             }
 
+            if (numberBuilder.Length > 0)
+            {
+                tokens.Add(numberBuilder.ToString());
+            }
 
-
-            //// Patterns for individual tokens
-            //String lpPattern = @"\(";
-            //String rpPattern = @"\)";
-            //String opPattern = @"[\+\-*/]";
-            //String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-            //String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
-            //String spacePattern = @"\s+";
-
-            //// Overall pattern
-            //String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-            //                                lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
-
-            //// Enumerate matching tokens that don't consist solely of white space.
-            //foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
-            //{
-            //    if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
-            //    {
-            //        yield return s;
-            //    }
-            //}
-
+            return tokens;
         }
+
     }
 
     /// <summary>

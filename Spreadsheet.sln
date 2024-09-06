@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaEvaluator", "FormulaEvaluator\FormulaEvaluator.csproj", "{51ACC9D1-CA2A-44CA-9C35-0ED9DAFB462E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FormulaEvaluatorTester", "FormulaEvaluatorTester\FormulaEvaluatorTester.csproj", "{2698E294-A847-4567-BD6D-A933F72BB98B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F4715E25-DD30-4470-8942-34081C80AC6B}"
 	ProjectSection(SolutionItems) = preProject
 		Whiteboard\architecture.jpg = Whiteboard\architecture.jpg
@@ -36,14 +32,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{51ACC9D1-CA2A-44CA-9C35-0ED9DAFB462E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{51ACC9D1-CA2A-44CA-9C35-0ED9DAFB462E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{51ACC9D1-CA2A-44CA-9C35-0ED9DAFB462E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{51ACC9D1-CA2A-44CA-9C35-0ED9DAFB462E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2698E294-A847-4567-BD6D-A933F72BB98B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2698E294-A847-4567-BD6D-A933F72BB98B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2698E294-A847-4567-BD6D-A933F72BB98B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2698E294-A847-4567-BD6D-A933F72BB98B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E9A007BA-1A82-445F-9615-0B6C7C9773E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E9A007BA-1A82-445F-9615-0B6C7C9773E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9A007BA-1A82-445F-9615-0B6C7C9773E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
