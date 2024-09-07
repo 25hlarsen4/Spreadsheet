@@ -15,9 +15,9 @@ Copyright:			CS3500, Hannah Larsen, Todd Oldham - This work may not be copied fo
 
 - Spreadsheet cells are capable of holding whole numbers, decimals, or string values.
 - Spreadsheet cells are capable of performing mathematical formula evaluations. The allowed operators are +, -, *, /, (, and ).
-  The allowed operands are typed out numbers or references to other cells which must have number values.
-  Formula examples: =1+1 is valid, =-1+1 is valid, =(-2+1)*5.
-                    Then say cell A1 contains value -1, create a forumla referencing A1 like so: =A1+1
+  The allowed operands are typed out non-negative numbers or references to other cells which must have number values.
+  Formula examples: =1+1 is valid, =-1+1 is not valid, =1-1 is valid.
+                    Then say cell A1 contains value -1, a forumla referencing A1 like so is valid: =A1+1
 
 - When you click on a cell/are focues on it, it will show the cell contents (either a typed out number or string value, or a formula that was entered)
 - When you are no longer focused on a cell, it will show the actual cell value (either a typed out number or string value, or the evaluation of a formula in the cell)
