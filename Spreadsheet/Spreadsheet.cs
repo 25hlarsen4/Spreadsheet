@@ -326,8 +326,8 @@ namespace SS
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
             name = Normalize(name);
-            DetermineIfNameIsInvalid(name);
 
+            DetermineIfNameIsInvalid(name);
             return graph.GetDependents(name);
         }
 

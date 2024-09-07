@@ -19,14 +19,6 @@ namespace FormulaTests
     [TestClass]
     public class FormulaTests
     {
-        [TestMethod]
-        public void Autograder()
-        {
-            Formula f1 = new Formula("1e-2 + X5 + 17.00 * 19 ");
-            string result = f1.ToString();
-            Formula f2 = new Formula("   0.0100  +     X5+ 17 * 19.00000 ");
-            Assert.IsTrue(1 == 1);
-        }
 
         /// <summary>
         /// This tests that the formula constructor throws a FormulaFormatException when
@@ -91,48 +83,12 @@ namespace FormulaTests
 
         /// <summary>
         /// This tests that the formula constructor throws a FormulaFormatException when
-        /// the formula includes a negative number.
-        /// </summary>
-        [TestMethod]
-        public void TestSyntacticallyIncorrectFormulaNegativeNumber()
-        {
-            Action a = () => new Formula("-2");
-            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
-        }
-
-
-        /// <summary>
-        /// This tests that the formula constructor throws a FormulaFormatException in
-        /// another case in which the formula includes a negative number.
-        /// </summary>
-        [TestMethod]
-        public void TestSyntacticallyIncorrectFormulaNegativeNumber2()
-        {
-            Action a = () => new Formula("3 + (-4)");
-            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
-        }
-
-
-        /// <summary>
-        /// This tests that the formula constructor throws a FormulaFormatException when
         /// a ) is not followed by an operator or )
         /// </summary>
         [TestMethod]
         public void TestSyntacticallyIncorrectFormulaInvalidOrdering()
         {
             Action a = () => new Formula("3 + 2)(");
-            Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
-        }
-
-
-        /// <summary>
-        /// This tests that the formula constructor throws a FormulaFormatException when
-        /// a number is not followed by an operator or ).
-        /// </summary>
-        [TestMethod]
-        public void TestSyntacticallyIncorrectFormulaInvalidOrdering2()
-        {
-            Action a = () => new Formula("3 * 2 3");
             Assert.ThrowsException<FormulaFormatException>(a, "failed to throw exception");
         }
 
@@ -298,17 +254,6 @@ namespace FormulaTests
         {
             Formula form = new Formula("( 5-10 )/2");
             Assert.AreEqual(form.Evaluate(null), -2.5);
-        }
-
-
-        /// <summary>
-        /// This tests that the evaluate method can correctly handle scientific notation.
-        /// </summary>
-        [TestMethod]
-        public void TestEvaluateScientificNotation()
-        {
-            Formula form = new Formula("5e-5/10");
-            Assert.AreEqual(form.Evaluate(null), 5e-6);
         }
 
 

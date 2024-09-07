@@ -313,6 +313,15 @@ namespace GUI
             {
                 await DisplayAlert("Alert", "Cycle encountered.", "OK");
             }
+            catch (InvalidNameException)
+            {
+                await DisplayAlert("Alert", "Invalid variable name.", "OK");
+            }
+            catch
+            {
+                await DisplayAlert("Alert", "Error.", "OK");
+            }
+
 
         }
 

@@ -608,86 +608,69 @@ namespace SpreadsheetUtilities
             return code;
         }
 
-        //private static List<string> Tokenize(string expression)
-        //{
-        //    var tokens = new List<string>();
-        //    var numberBuilder = new StringBuilder();
-        //    bool lastWasOperator = true;
-
-        //    for (int i = 0; i < expression.Length; i++)
-        //    {
-        //        char c = expression[i];
-
-        //        if (char.IsDigit(c) || c == '.')
-        //        {
-        //            numberBuilder.Append(c);
-        //            lastWasOperator = false;
-        //        }
-        //        else
-        //        {
-        //            if (numberBuilder.Length > 0)
-        //            {
-        //                Debug.WriteLine(numberBuilder.ToString());
-        //                tokens.Add(numberBuilder.ToString());
-        //                numberBuilder.Clear();
-        //            }
-
-        //            if (c == '-' && lastWasOperator)
-        //            {
-        //                // If last was an operator, treat "-" as part of a negative number.
-        //                numberBuilder.Append(c);
-        //            }
-        //            else
-        //            {
-        //                Debug.WriteLine(c.ToString());
-        //                tokens.Add(c.ToString());
-        //                lastWasOperator = (c != ')');
-        //            }
-        //        }
-        //    }
-
-        //    if (numberBuilder.Length > 0)
-        //    {
-        //        Debug.WriteLine(numberBuilder.ToString());
-        //        tokens.Add(numberBuilder.ToString());
-        //    }
-
-        //    return tokens;
-
-        //}
-
-
-
-        /// <summary>
-        /// Given an expression, enumerates the tokens that compose it.  Tokens are left paren;
-        /// right paren; one of the four operator symbols; a string consisting of a letter or underscore
-        /// followed by zero or more letters, digits, or underscores; a double literal; and anything that doesn't
-        /// match one of those patterns.  There are no empty tokens, and no token contains white space.
-        /// </summary>
-        /// <param name="formula"> The formula to get tokens from. </param>
-        /// <returns> An IEnumerable of the passed in formula's tokens. </returns>
-        private static IEnumerable<string> Tokenize(String formula)
+        private static List<string> Tokenize(string expression)
         {
-            // Patterns for individual tokens
-            String lpPattern = @"\(";
-            String rpPattern = @"\)";
-            String opPattern = @"[\+\-*/]";
-            String varPattern = @"[a-zA-Z_](?: [a-zA-Z_]|\d)*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: [eE][\+-]?\d+)?";
-            String spacePattern = @"\s+";
+            var tokens = new List<string>();
+            var numberBuilder = new StringBuilder();
+            bool lastWasOperator = true;
 
-            // Overall pattern
-            String pattern = String.Format("({0}) | ({1}) | ({2}) | ({3}) | ({4}) | ({5})",
-                                            lpPattern, rpPattern, opPattern, varPattern, doublePattern, spacePattern);
-
-            // Enumerate matching tokens that don't consist solely of white space.
-            foreach (String s in Regex.Split(formula, pattern, RegexOptions.IgnorePatternWhitespace))
+            int i = 0;
+            while (i < expression.Length)
             {
-                if (!Regex.IsMatch(s, @"^\s*$", RegexOptions.Singleline))
+                char c = expression[i];
+
+                if (c == ' ')
                 {
-                    yield return s;
+                    // ignore spaces
                 }
+                else if (char.IsDigit(c) || c == '.')
+                {
+                    numberBuilder.Append(c);
+                    lastWasOperator = false;
+                }
+                else
+                {
+                    if (numberBuilder.Length > 0)
+                    {
+                        tokens.Add(numberBuilder.ToString());
+                        numberBuilder.Clear();
+                    }
+
+                    if (c == '-' && lastWasOperator)
+                    {
+                        // If last was an operator, treat "-" as part of a negative number.
+                        numberBuilder.Append(c);
+                    }
+                    else if (char.IsLetter(c) || c == '_')
+                    {
+                        // indicates the start of a variable, extract the rest of it
+                        numberBuilder.Append(c);
+                        i++;
+                        while (i < expression.Length && (char.IsLetter(expression[i]) || char.IsDigit(expression[i]) || expression[i] == '_'))
+                        {
+                            numberBuilder.Append(expression[i]);
+                            i++;
+                        }
+                        i--;
+                        tokens.Add(numberBuilder.ToString());
+                        numberBuilder.Clear();
+                        lastWasOperator = false;
+                    }
+                    else
+                    {
+                        tokens.Add(c.ToString());
+                        lastWasOperator = (c != ')');
+                    }
+                }
+                i++;
             }
+
+            if (numberBuilder.Length > 0)
+            {
+                tokens.Add(numberBuilder.ToString());
+            }
+
+            return tokens;
 
         }
 
