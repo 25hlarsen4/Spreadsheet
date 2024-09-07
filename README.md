@@ -22,6 +22,7 @@ Copyright:			CS3500, Hannah Larsen, Todd Oldham - This work may not be copied fo
 - When you are no longer focused on a cell, it will show the actual cell value (either a typed out number or string value, or the evaluation of a formula in the cell)
 
 # How to use:
+- The application runs on Visual Studio NET7.0 and the MAUI workload must be downloaded.
 - To fill a cell with an numerical or string value, click the cell, type the value, and hit enter.
 - To fill a cell with a formula to be evaluated, for example to make cell C1 = A1 + B1, click cell C1 and type the desired formula, starting with an = sign, no spacing requirements.
   So for this example, click cell C1, type =A1+B1, and hit enter
