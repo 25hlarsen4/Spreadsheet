@@ -12,11 +12,11 @@ Copyright:			CS3500, Hannah Larsen, Todd Oldham - This work may not be copied fo
 # Overview of the Spreadsheet Functionality:
 
 - Spreadsheet cells are capable of holding whole numbers, decimals, or string values.
-- Spreadsheet cells are capable of performing mathematical formula evaluations. The allowed operators are +, -, *, /, (, and ).
+- Spreadsheet cells are capable of performing mathematical formula evaluations. The allowed operators are +, -, \*, /, (, and ).
   The allowed operands are typed out numbers or references to other cells which must have numberic values. Spaces in formulas are ignored.
   Formula examples: =1+1, =-1+1, =(3-1)-(2+4), =2-(-2)
                     Then say cell A1 contains value -1, a forumla referencing A1 like so is valid: =A1+1
-                    Note that implicit multiplication is not allowed. For example, you must do =2*(4-1), not =2(4-1)
+                    Note that implicit multiplication is not allowed. For example, you must do =2\*(4-1), not =2(4-1)
 
 - When you click on a cell/are focues on it, it will show the cell contents (either a typed out number or string value, or a formula that was entered)
 - When you are no longer focused on a cell, it will show the actual cell value (either a typed out number or string value, or the evaluation of a formula in the cell)
