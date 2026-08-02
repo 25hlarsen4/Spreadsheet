@@ -76,7 +76,9 @@ namespace GUI
             InitializeComponent();
 
             InitializeGrid();
+
         }
+
 
         /// <summary>
         /// Starter code provided by the professor
@@ -235,7 +237,13 @@ namespace GUI
             string path = await DisplayPromptAsync("", "Provide a file to load from");
             path += ".sprd";
 
-            Application.Current.MainPage = new MainPage(path);
+            //Application.Current.MainPage = new MainPage(path);
+
+            MainPage page = new MainPage(path);
+
+            await Task.Delay(2000);
+
+            Application.Current.MainPage = page;
         }
 
         /// <summary>
